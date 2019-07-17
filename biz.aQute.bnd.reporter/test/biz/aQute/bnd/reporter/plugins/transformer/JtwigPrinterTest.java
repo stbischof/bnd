@@ -115,6 +115,26 @@ public class JtwigPrinterTest extends TestCase {
 			.check();
 	}
 
+	public void testChecksum() throws Exception {
+		TwigChecker checker = checker("printChecksum");
+
+		checker.with(map().set("md5", "md5Value")
+			.set("sha1", "sha1Value")
+			.set("sha256", "sha256Value"))
+			.expect("```")
+			.expect("md5:    md5Value")
+			.expect("sha1:   sha1Value")
+			.expect("sha256: sha256Value")
+			.expect("```")
+			.check();
+
+		checker.with(map().set("sha1", "sha1Value"))
+			.expect("```")
+			.expect("sha1:   sha1Value")
+			.expect("```")
+			.check();
+	}
+
 	public void testOSGiVersion() throws Exception {
 		TwigChecker checker = checker("printOsgiVersion");
 
