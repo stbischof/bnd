@@ -272,6 +272,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("#### Configuration")
 			.expectBlankLine()
 			.expect("No configuration.")
+			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
 			.check();
 
 		checker.with(list(map().set("name", "name")
@@ -293,6 +297,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expectBlankLine()
 			.expect("No configuration.")
 			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
+			.expectBlankLine()
 			.expect("---")
 			.expectBlankLine()
 			.expect("### name2 - *state = not enabled, activation = delayed*")
@@ -308,6 +316,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("#### Configuration")
 			.expectBlankLine()
 			.expect("No configuration.")
+			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
 			.check();
 	}
 
@@ -564,6 +576,36 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("|Required |**false** |")
 			.expect("|Type |**Integer** |")
 			.expect("|Value range |\"VALUE\" |")
+			.check();
+	}
+
+	public void testComponentReferences() throws Exception {
+		TwigChecker checker = checker("_printComponentReferneces");
+
+		checker.with(map())
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
+			.check();
+
+		checker.with(map().set("references", list(map().set("cardinality", "cardinality")
+			.set("interfaceName", "interfaceName")
+			.set("name", "name")
+			.set("policy", "policy")
+			.set("policyOption", "policyOption")
+			.set("scope", "scope")
+			.set("target", "target"))))
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("|Attribut |Value |")
+			.expect("|--- |--- |")
+			.expect("|name |name |")
+			.expect("|interfaceName |interfaceName |")
+			.expect("|target |target |")
+			.expect("|cardinality |cardinality |")
+			.expect("|policy |policy |")
+			.expect("|policyOption |policyOption |")
+			.expect("|scope |scope |")
 			.check();
 	}
 

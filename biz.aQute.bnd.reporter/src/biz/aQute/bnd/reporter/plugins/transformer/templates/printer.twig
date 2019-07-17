@@ -99,6 +99,8 @@
 {{ this._printComponentProperties(c) }}
 
 {{ this._printComponentConfiguration(c, metatypes) }}
+
+{{ this._printComponentReferneces(c) }}
 {%- endfor -%}
 {%- endmacro %}
 
@@ -210,9 +212,34 @@ No information available.
 {%- endif -%}
 {%- endfor -%}
 {%- endif -%}
+{%- endfor %}
+{%- endif %}
+{%- endmacro %}
+
+
+{# 
+# COMPONENT REFERENCES
+#}
+{% macro _printComponentReferneces (c) -%}
+{%- import _self as this -%}
+{{ this.printTitle('Reference bindings',4) }}{{ '\n\n' }}
+
+{%- if c.references is empty -%}
+No bindings.
+{%- else -%}
+{%- for r in c.references %}
+{{- this.printTableHeaders(['Attribut','Value']) }}
+|name |{{r.name}} |
+|interfaceName |{{r.interfaceName}} |
+|target |{{r.target}} |
+|cardinality |{{r.cardinality}} |
+|policy |{{r.policy}} |
+|policyOption |{{r.policyOption}} |
+|scope |{{r.scope}} |
 {%- endfor -%}
 {%- endif -%}
 {%- endmacro %}
+
 
 {# 
 # DEVELOPERS
