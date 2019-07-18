@@ -18,7 +18,7 @@ public class GogoPluginTest extends TestCase {
 
 	public void testComponents() throws Exception {
 
-		final Jar jar = new Jar("jar", "testresources/gogoEntry/source.jar");
+		try (final Jar jar = new Jar("jar", "testresources/gogoEntry/source.jar")) {
 		final Processor p = new Processor();
 		final GogoPlugin e = new GogoPlugin();
 		final Map<String, Object> result = new HashMap<>();
@@ -45,5 +45,6 @@ public class GogoPluginTest extends TestCase {
 		ee.deleteCharAt(ee.length() - 1);
 
 		assertEquals(ee.toString(), new String(s.toByteArray()));
+		}
 	}
 }

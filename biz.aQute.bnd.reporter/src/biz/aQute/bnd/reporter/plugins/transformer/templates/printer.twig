@@ -279,13 +279,27 @@ No information available.
     "{{ pid }}":{
 
 {%- endif %}
+        //# Component properties    
+{%- if c.properties is empty %}
+        // none
+{% else %}
+{%- for key, a in c.properties %}
+        /*
+         * Type = {{ this.printPropertyType(a.type,a.multiValue) }}
+{%- if length(a.values) > 0 %}
+         * Default = {{ this.printPropertyValues(a.type,a.values,a.multiValue) }}
+{%- endif %}
+         */
+         // "{{ key }}": null,{% if loop.last %}{{ '\n' }}{% else%}{% endif %}{{ '\n' }}
+{%- endfor %}
+{%- endif %}
         //# Reference bindings    
 {%- if c.references is empty %}
         // none
 {%- else -%}
 {%- for r in c.references %}
         // "{{r.name}}.target": {% if r.target=='' %}"(component.pid=*)"{% else %}"{{r.target}}"{% endif -%}
-{%- if loop.last -%}{%- if loop.parent.o == 'notset' %}{% else %},{% endif %}{% else %},{%- endif -%}
+{%- if loop.last -%}{%- if loop.parent.o == 'notset' %}{% else %},{% endif %}{{ '\n' }}{% else %},{%- endif -%}
 {%- endfor %}
 {%- endif %}
 
@@ -309,8 +323,8 @@ No information available.
          * Value restriction = {{ this.printOptions(a.options) }}
 {%- endif %}
          */
-         {% if a.required!='true' %}// {% endif -%}"{{ a.id }}": null{% if loop.last %}{% else%},{% endif %}
-{% endfor %}
+         {% if a.required!='true' %}// {% endif -%}"{{ a.id }}": null{% if loop.last %}{% else%},{% endif %}{{ '\n' }}
+{%- endfor %}
 {%- endif -%}
 }
 ```

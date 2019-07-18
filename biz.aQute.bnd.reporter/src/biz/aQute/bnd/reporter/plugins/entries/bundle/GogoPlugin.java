@@ -106,174 +106,176 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 		}
 
 		final List<GogoScopeDTO> gogos = new LinkedList<>();
-		for (final String path : componentPaths) {
+		try (Analyzer analyzer = new Analyzer()) {
 
-			final Resource r = jar.getResource(path);
-			if (r != null) {
-				try (InputStream in = r.openInputStream()) {
+			for (final String path : componentPaths) {
 
-					final Document doc = db.parse(in);
-					final Element root = doc.getDocumentElement();
+				final Resource r = jar.getResource(path);
+				if (r != null) {
+					try (InputStream in = r.openInputStream()) {
 
-					String implementationClass;
+						final Document doc = db.parse(in);
+						final Element root = doc.getDocumentElement();
 
-					final NodeList implementations = root.getElementsByTagName(IMPLEMENTATION_TAG);
-					if (implementations.getLength() > 0
-						&& ((Element) implementations.item(0)).hasAttribute(CLASS_ATTR)) {
-						implementationClass = ((Element) implementations.item(0)).getAttribute(CLASS_ATTR);
-					} else {
+						String implementationClass;
 
-						_reporter.warning("the component does not declare an implementation class %s", path);
-						continue;
-					}
-
-					final NodeList propertiesFile = root.getElementsByTagName(PROPERTIES_TAG);
-
-					final Set<String> propertiesName = new HashSet<>();
-					List<String> functions = null;
-					String scope = null;
-					for (int i = 0; i < propertiesFile.getLength(); i++) {
-
-						final Element property = (Element) propertiesFile.item(i);
-						final String pathProp = property.getAttribute(ENTRY_ATTR);
-
-						if (pathProp.isEmpty()) {
-							_reporter.warning("missing property path attribute for component %s", path);
+						final NodeList implementations = root.getElementsByTagName(IMPLEMENTATION_TAG);
+						if (implementations.getLength() > 0
+							&& ((Element) implementations.item(0)).hasAttribute(CLASS_ATTR)) {
+							implementationClass = ((Element) implementations.item(0)).getAttribute(CLASS_ATTR);
 						} else {
-							final Resource rP = jar.getResource(pathProp);
-							if (rP != null) {
-								try (InputStream inProp = rP.openInputStream()) {
-									final Properties prop = new Properties();
 
-									prop.load(inProp);
-
-									if (prop.contains(SCOPE)) {
-
-										scope = prop.getProperty(SCOPE);
-										propertiesName.add(SCOPE);
-
-									}
-
-									if (prop.contains(FUNCTION)) {
-										functions = Arrays.asList(prop.getProperty(FUNCTION));
-										propertiesName.add(FUNCTION);
-									}
-								}
-							}
-						}
-					}
-
-					final NodeList properties = root.getElementsByTagName(PROPERTY_TAG);
-
-					for (int i = 0; i < properties.getLength(); i++) {
-
-						final Element property = (Element) properties.item(i);
-
-						String pName = null;
-						if (property.hasAttribute(NAME_ATTR)) {
-							pName = property.getAttribute(NAME_ATTR);
-						} else {
-							pName = "!! MISSING !!";
-							_reporter.warning("missing property name attribute for component %s", path);
-						}
-
-						if (!pName.equals(SCOPE) && !pName.equals(FUNCTION)) {
+							_reporter.warning("the component does not declare an implementation class %s", path);
 							continue;
-
 						}
-						if (!propertiesName.contains(pName)) {
 
-							if (property.hasAttribute(VALUE_ATTR)) {
-								String val = property.getAttribute(VALUE_ATTR);
+						final NodeList propertiesFile = root.getElementsByTagName(PROPERTIES_TAG);
 
-								if (SCOPE.equals(pName)) {
-									scope = val;
-								}
-								if (FUNCTION.equals(pName)) {
-									functions = Arrays.asList(val);
-								}
+						final Set<String> propertiesName = new HashSet<>();
+						List<String> functions = null;
+						String scope = null;
+						for (int i = 0; i < propertiesFile.getLength(); i++) {
+
+							final Element property = (Element) propertiesFile.item(i);
+							final String pathProp = property.getAttribute(ENTRY_ATTR);
+
+							if (pathProp.isEmpty()) {
+								_reporter.warning("missing property path attribute for component %s", path);
 							} else {
+								final Resource rP = jar.getResource(pathProp);
+								if (rP != null) {
+									try (InputStream inProp = rP.openInputStream()) {
+										final Properties prop = new Properties();
 
-								final String[] vals = property.getTextContent()
-									.split("\n");
+										prop.load(inProp);
 
-								if (SCOPE.equals(pName)) {
-									if (vals.length == 1) {
-										scope = vals[0];
-									} else {
+										if (prop.contains(SCOPE)) {
 
-										_reporter.warning(
-											"More than one gogo scope set as property name attribute for component %s",
-											path);
+											scope = prop.getProperty(SCOPE);
+											propertiesName.add(SCOPE);
+
+										}
+
+										if (prop.contains(FUNCTION)) {
+											functions = Arrays.asList(prop.getProperty(FUNCTION));
+											propertiesName.add(FUNCTION);
+										}
 									}
-
 								}
-								if (FUNCTION.equals(pName)) {
-									functions = Arrays.asList(vals);
-								}
-
 							}
 						}
 
-					}
-					if (scope == null || functions == null || functions.isEmpty()) {
+						final NodeList properties = root.getElementsByTagName(PROPERTY_TAG);
 
-						continue;
-					}
-					final String fScope = scope;
-					Optional<GogoScopeDTO> optional = gogos.stream()
-						.filter(dto -> fScope.equals(dto.title))
-						.findFirst();
+						for (int i = 0; i < properties.getLength(); i++) {
 
-					GogoScopeDTO gogoScopeDTO = null;
-					if (optional.isPresent()) {
-						gogoScopeDTO = optional.get();
+							final Element property = (Element) properties.item(i);
 
-					} else {
-						gogoScopeDTO = new GogoScopeDTO();
-						gogoScopeDTO.title = scope;
-						gogoScopeDTO.functions = new ArrayList<GogoFunctionDTO>();
+							String pName = null;
+							if (property.hasAttribute(NAME_ATTR)) {
+								pName = property.getAttribute(NAME_ATTR);
+							} else {
+								pName = "!! MISSING !!";
+								_reporter.warning("missing property name attribute for component %s", path);
+							}
 
-					}
+							if (!pName.equals(SCOPE) && !pName.equals(FUNCTION)) {
+								continue;
 
-					for (final String function : functions) {
+							}
+							if (!propertiesName.contains(pName)) {
 
-						Optional<GogoFunctionDTO> optionalF = gogoScopeDTO.functions.stream()
-							.filter(dto -> function.equals(dto.title))
+								if (property.hasAttribute(VALUE_ATTR)) {
+									String val = property.getAttribute(VALUE_ATTR);
+
+									if (SCOPE.equals(pName)) {
+										scope = val;
+									}
+									if (FUNCTION.equals(pName)) {
+										functions = Arrays.asList(val);
+									}
+								} else {
+
+									final String[] vals = property.getTextContent()
+										.split("\n");
+
+									if (SCOPE.equals(pName)) {
+										if (vals.length == 1) {
+											scope = vals[0];
+										} else {
+
+											_reporter.warning(
+												"More than one gogo scope set as property name attribute for component %s",
+												path);
+										}
+
+									}
+									if (FUNCTION.equals(pName)) {
+										functions = Arrays.asList(vals);
+									}
+
+								}
+							}
+
+						}
+						if (scope == null || functions == null || functions.isEmpty()) {
+
+							continue;
+						}
+						final String fScope = scope;
+						Optional<GogoScopeDTO> optional = gogos.stream()
+							.filter(dto -> fScope.equals(dto.title))
 							.findFirst();
 
-						GogoFunctionDTO gogoFunctionDTO = null;
+						GogoScopeDTO gogoScopeDTO = null;
+						if (optional.isPresent()) {
+							gogoScopeDTO = optional.get();
 
-						if (optionalF.isPresent()) {
-							gogoFunctionDTO = optionalF.get();
 						} else {
-							gogoFunctionDTO = new GogoFunctionDTO();
-							gogoFunctionDTO.title = function;
-							gogoFunctionDTO.methods = new ArrayList<GogoMethodDTO>();
-						}
-						String pathClazz = implementationClass.replace(".", "/") + ".class";
-						Resource resClazz = jar.getResource(pathClazz);
-						Analyzer analyzer = new Analyzer();
-						Clazz clazz = new Clazz(analyzer, null, resClazz);
-						clazz.parseClassFile(resClazz.openInputStream());
-						gogoFunctionDTO.methods.addAll(createMethodDTO(clazz, function));
+							gogoScopeDTO = new GogoScopeDTO();
+							gogoScopeDTO.title = scope;
+							gogoScopeDTO.functions = new ArrayList<GogoFunctionDTO>();
 
-						gogoScopeDTO.functions.add(gogoFunctionDTO);
+						}
+
+						for (final String function : functions) {
+
+							Optional<GogoFunctionDTO> optionalF = gogoScopeDTO.functions.stream()
+								.filter(dto -> function.equals(dto.title))
+								.findFirst();
+
+							GogoFunctionDTO gogoFunctionDTO = null;
+
+							if (optionalF.isPresent()) {
+								gogoFunctionDTO = optionalF.get();
+							} else {
+								gogoFunctionDTO = new GogoFunctionDTO();
+								gogoFunctionDTO.title = function;
+								gogoFunctionDTO.methods = new ArrayList<GogoMethodDTO>();
+							}
+							String pathClazz = implementationClass.replace(".", "/") + ".class";
+							Resource resClazz = jar.getResource(pathClazz);
+							Clazz clazz = new Clazz(analyzer, null, resClazz);
+							clazz.parseClassFile();
+							gogoFunctionDTO.methods.addAll(createMethodDTO(clazz, function));
+
+							gogoScopeDTO.functions.add(gogoFunctionDTO);
+						}
+						gogos.add(gogoScopeDTO);
 					}
-					gogos.add(gogoScopeDTO);
+				} else {
+					if (!path.contains("*")) {
+						_reporter.warning("xml component file not found at path %s", path);
+					}
 				}
-			} else {
-				if (!path.contains("*")) {
-					_reporter.warning("xml component file not found at path %s", path);
-				}
+
 			}
 		}
+
 		return !gogos.isEmpty() ? gogos : null;
 	}
 
 	private Collection<GogoMethodDTO> createMethodDTO(final Clazz clazz, final String function) throws Exception {
-
-		clazz.parseClassFile();
 
 		return clazz.methods()
 			.filter(m -> function.equals(m.getName()))
@@ -283,9 +285,8 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 				gogoMethodDTO.title = m.getName();
 				gogoMethodDTO.parameters = Lists.newArrayList();
 
-				Optional<Annotation> oDescriptorAnnotation = m.annotations("*")
-					.filter(a -> ANNOTOATION_NAME_DESCRIPTOR.equals(a.getName()
-						.toString()))
+				Optional<Annotation> oDescriptorAnnotation = m
+					.annotations(ANNOTOATION_NAME_DESCRIPTOR.replace(".", "/"))
 					.findFirst();
 
 				if (oDescriptorAnnotation.isPresent()) {
@@ -313,39 +314,38 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 
 					for (ParameterAnnotation parameterAnnotation : methodParameters) {
 
-						if (parameterAnnotation.parameter() == i
-							&& ANNOTOATION_NAME_DESCRIPTOR.equals(parameterAnnotation.getName()
+						if (parameterAnnotation.parameter() == i) {
+
+							if (ANNOTOATION_NAME_DESCRIPTOR.equals(parameterAnnotation.getName()
 								.toString())) {
 
-							gogoParameterDTO.description = parameterAnnotation.get("value");
-						}
-
-						if (parameterAnnotation.parameter() == i
-							&& ANNOTOATION_NAME_PARAMETER.equals(parameterAnnotation.getName()
+								gogoParameterDTO.description = parameterAnnotation.get("value");
+							} else if (ANNOTOATION_NAME_PARAMETER.equals(parameterAnnotation.getName()
 								.toString())) {
 
-							gogoParameterDTO.presentValue = parameterAnnotation.get("presentValue");
+								gogoParameterDTO.presentValue = parameterAnnotation.get("presentValue");
 
-							for (Entry<String, Object> entry : parameterAnnotation.entrySet()) {
+								for (Entry<String, Object> entry : parameterAnnotation.entrySet()) {
 
-								if (entry.getKey()
-									.equals("absentValue")) {
-									gogoParameterDTO.absentValue = (String) entry.getValue();
+									if (entry.getKey()
+										.equals("absentValue")) {
+										gogoParameterDTO.absentValue = (String) entry.getValue();
 
-								} else if (entry.getKey()
-									.equals("presentValue")) {
-									gogoParameterDTO.absentValue = (String) entry.getValue();
+									} else if (entry.getKey()
+										.equals("presentValue")) {
+										gogoParameterDTO.absentValue = (String) entry.getValue();
 
-								} else if (entry.getKey()
-									.equals("names")) {
+									} else if (entry.getKey()
+										.equals("names")) {
 
-									gogoParameterDTO.names = Stream.of((Object[]) entry.getValue())
-										.map(o -> o.toString())
-										.collect(Collectors.toList());
+										gogoParameterDTO.names = Stream.of((Object[]) entry.getValue())
+											.map(o -> o.toString())
+											.collect(Collectors.toList());
 
+									}
 								}
-							}
 
+							}
 						}
 
 					}
