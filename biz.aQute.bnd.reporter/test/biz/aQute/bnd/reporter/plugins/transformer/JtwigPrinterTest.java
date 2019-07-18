@@ -61,6 +61,38 @@ public class JtwigPrinterTest extends TestCase {
 			.check();
 	}
 
+	public void testSlingFeatureCoordinates() throws Exception {
+		TwigChecker checker = checker("printFeatureCoordinate");
+
+		checker.with(map().set("groupId", "groupIdTest")
+			.set("artifactId", "artifactIdTest")
+			.set("version", "versionTest"))
+			.expect("```")
+			.expect("\"bundles\": [")
+			.expect("   {")
+			.expect("    \"id\": \"groupIdTest:artifactIdTest:versionTest\"")
+			.expect("   }")
+			.expect("]")
+			.expect("```")
+			.check();
+
+		checker.with(map().set("groupId", "groupIdTest")
+			.set("artifactId", "artifactIdTest")
+			.set("version", "versionTest")
+			.set("classifier", "extra"))
+			.with(map().set("sha1", "theChecksum"))
+			.expect("```")
+			.expect("\"bundles\": [")
+			.expect("   {")
+			.expect("    \"id\": \"groupIdTest:artifactIdTest:versionTest:jar:extra\"")
+			.expect("    \"hash\": \"theChecksum\"")
+			.expect("   }")
+			.expect("]")
+			.expect("```")
+			.check();
+
+	}
+
 	public void testMavenCoordinate() throws Exception {
 		TwigChecker checker = checker("printMavenCoordinate");
 
@@ -72,6 +104,20 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("    <groupId>groupIdTest</groupId>")
 			.expect("    <artifactId>artifactIdTest</artifactId>")
 			.expect("    <version>versionTest</version>")
+			.expect("</dependency>")
+			.expect("```")
+			.check();
+
+		checker.with(map().set("groupId", "groupIdTest")
+			.set("artifactId", "artifactIdTest")
+			.set("version", "versionTest")
+			.set("classifier", "extra"))
+			.expect("```xml")
+			.expect("<dependency>")
+			.expect("    <groupId>groupIdTest</groupId>")
+			.expect("    <artifactId>artifactIdTest</artifactId>")
+			.expect("    <version>versionTest</version>")
+			.expect("    <classifier>extra</classifier>")
 			.expect("</dependency>")
 			.expect("```")
 			.check();
@@ -112,6 +158,26 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("**Bundle Symbolic Name: test")
 			.expect("**Version             : 1.0.0")
 			.expect("**```")
+			.check();
+	}
+
+	public void testChecksum() throws Exception {
+		TwigChecker checker = checker("printChecksum");
+
+		checker.with(map().set("md5", "md5Value")
+			.set("sha1", "sha1Value")
+			.set("sha256", "sha256Value"))
+			.expect("```")
+			.expect("md5:    md5Value")
+			.expect("sha1:   sha1Value")
+			.expect("sha256: sha256Value")
+			.expect("```")
+			.check();
+
+		checker.with(map().set("sha1", "sha1Value"))
+			.expect("```")
+			.expect("sha1:   sha1Value")
+			.expect("```")
 			.check();
 	}
 
@@ -272,6 +338,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("#### Configuration")
 			.expectBlankLine()
 			.expect("No configuration.")
+			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
 			.check();
 
 		checker.with(list(map().set("name", "name")
@@ -293,6 +363,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expectBlankLine()
 			.expect("No configuration.")
 			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
+			.expectBlankLine()
 			.expect("---")
 			.expectBlankLine()
 			.expect("### name2 - *state = not enabled, activation = delayed*")
@@ -308,6 +382,10 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("#### Configuration")
 			.expectBlankLine()
 			.expect("No configuration.")
+			.expectBlankLine()
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
 			.check();
 	}
 
@@ -564,6 +642,123 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("|Required |**false** |")
 			.expect("|Type |**Integer** |")
 			.expect("|Value range |\"VALUE\" |")
+			.check();
+	}
+
+	public void testComponentOSGiConfiguratorSnippet() throws Exception {
+		TwigChecker checker = checker("_printComponentJsonConfiguratorSnippet");
+
+		checker.with(map().set("configurationPolicy", "required")
+			.set("configurationPid", list("my.pid"))
+			.set("name", "MyComponentName"))
+			.expect("#### OSGi-Configurator")
+			.expectBlankLine()
+			.expectBlankLine()
+			.expect("```")
+			.expect("/*")
+			.expect(" * Component: MyComponentName")
+			.expect(" * policy:    required")
+			.expect(" */")
+			.expect("\"my.pid\":{")
+			.expect("        //# Reference bindings")
+			.expect("        // none")
+			.expectBlankLine()
+			.expect("        //# ObjectClassDefinition - Attributes")
+			.expect("        // (No PidOcd available.)")
+			.expect("}")
+			.expect("```")
+			.check();
+
+		checker.with(map().set("configurationPolicy", "required")
+			.set("configurationPid", list("my.pid"))
+			.set("name", "MyComponentName")
+			.set("references", list(map().set("cardinality", "cardinality")
+				.set("interfaceName", "interfaceName")
+				.set("name", "name")
+				.set("policy", "policy")
+				.set("policyOption", "policyOption")
+				.set("scope", "scope")
+				.set("target", "target"),
+				map().set("cardinality", "cardinality")
+					.set("interfaceName", "interfaceName")
+					.set("name", "name")
+					.set("policy", "policy")
+					.set("policyOption", "policyOption")
+					.set("scope", "scope")
+					.set("target", null))))
+			.with(list(map().set("pids", list("my.pid"))
+				.set("attributes", list(map().set("id", "myId1")
+					.set("type", "Integer")
+					.set("required", true),
+					map().set("id", "myId2")
+						.set("type", "Integer")
+						.set("description", "descriptionFooBar")
+						.set("min", "1")
+						.set("max", "10")
+						.set("cardinality", "1")
+						.set("values", list("2", "3", "4"))
+						.set("required", false)))))
+			.expect("#### OSGi-Configurator")
+			.expectBlankLine()
+			.expectBlankLine()
+			.expect("```")
+			.expect("/*")
+			.expect(" * Component: MyComponentName")
+			.expect(" * policy:    required")
+			.expect(" */")
+			.expect("\"my.pid\":{")
+			.expect("        //# Reference bindings")
+			.expect("        // \"name.target\": \"target\",")
+			.expect("        // \"name.target\": \"(component.pid=*)\",")
+			.expectBlankLine()
+			.expect("        //# ObjectClassDefinition - Attributes")
+			.expect("        /*")
+			.expect("         * Required = true")
+			.expect("         * Type = Integer")
+			.expect("         */")
+			.expect("         \"myId1\": null,")
+			.expectBlankLine()
+			.expect("        /*")
+			.expect("         * Required = false")
+			.expect("         * Type = Integer[]")
+			.expect("         * Description = descriptionFooBar")
+			.expect("         * Default = [2, 3, 4]")
+			.expect("         * Value restriction = `min = 1` / `max = 10`")
+			.expect("         */")
+			.expect("         // \"myId2\": null")
+			.expect("}")
+			.expect("```")
+			.check();
+
+	}
+
+	public void testComponentReferences() throws Exception {
+		TwigChecker checker = checker("_printComponentReferneces");
+
+		checker.with(map())
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("No bindings.")
+			.check();
+
+		checker.with(map().set("references", list(map().set("cardinality", "cardinality")
+			.set("interfaceName", "interfaceName")
+			.set("name", "name")
+			.set("policy", "policy")
+			.set("policyOption", "policyOption")
+			.set("scope", "scope")
+			.set("target", "target"))))
+			.expect("#### Reference bindings")
+			.expectBlankLine()
+			.expect("|Attribute |Value |")
+			.expect("|--- |--- |")
+			.expect("|name |name |")
+			.expect("|interfaceName |interfaceName |")
+			.expect("|target |target |")
+			.expect("|cardinality |cardinality |")
+			.expect("|policy |policy |")
+			.expect("|policyOption |policyOption |")
+			.expect("|scope |scope |")
 			.check();
 	}
 
@@ -859,7 +1054,6 @@ public class JtwigPrinterTest extends TestCase {
 		project5.set("fileName", "folder1");
 		project5.set("bundles", list(map().set("manifest", manifest3)));
 
-
 		checker.with(map().set("projects", list(project, project5)))
 			.expect("* [**CName**](folder1): CDescription")
 			.expect("  * [**CName2**](folder1/folder2): CDescription2")
@@ -875,8 +1069,7 @@ public class JtwigPrinterTest extends TestCase {
 		checker.with(list())
 			.check();
 
-		checker.with(list().xadd(map()
-			.set("programmingLanguage", "java")
+		checker.with(list().xadd(map().set("programmingLanguage", "java")
 			.set("codeSnippet", "test")))
 			.expect("```java")
 			.expect("test")
@@ -896,10 +1089,9 @@ public class JtwigPrinterTest extends TestCase {
 			.expect("```")
 			.check();
 
-		checker.with(list().xadd(map()
-			.set("steps", list().xadd(map().set("programmingLanguage", "java")
-				.set("codeSnippet", "test1"))
-				.xadd(map().set("programmingLanguage", "java")
+		checker.with(list().xadd(map().set("steps", list().xadd(map().set("programmingLanguage", "java")
+			.set("codeSnippet", "test1"))
+			.xadd(map().set("programmingLanguage", "java")
 				.set("codeSnippet", "test2"))))
 			.xadd(map().set("programmingLanguage", "java")
 				.set("codeSnippet", "test3")))
@@ -924,7 +1116,7 @@ public class JtwigPrinterTest extends TestCase {
 				.set("steps", list().xadd(map().set("title", "SubTitle1")
 					.set("description", "SubDescription 1")
 					.set("programmingLanguage", "java")
-				.set("codeSnippet", "test1"))
+					.set("codeSnippet", "test1"))
 					.xadd(map().set("title", "SubTitle2")
 						.set("description", "SubDescription 2")
 						.set("programmingLanguage", "java")
@@ -1054,7 +1246,7 @@ public class JtwigPrinterTest extends TestCase {
 
 		checker.with("")
 			.with(map().set("type", "url")
-			.set("address", "myurl"))
+				.set("address", "myurl"))
 			.expect("[myurl](myurl)")
 			.check();
 	}

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.OutputStream;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import java.util.jar.Manifest;
 
@@ -14,6 +13,7 @@ import org.junit.Test;
 import aQute.bnd.osgi.Jar;
 import aQute.bnd.osgi.Processor;
 import aQute.bnd.osgi.WriteResource;
+import biz.aQute.bnd.reporter.artifact.dto.MavenCoordinatesDTO;
 
 public class MavenCoordinatePluginTest {
 
@@ -31,6 +31,8 @@ public class MavenCoordinatePluginTest {
 		prop.setProperty("version", "1.0.0");
 		prop.setProperty("groupId", "com.test");
 		prop.setProperty("artifactId", "test");
+		// prop.setProperty("type", "test");
+		prop.setProperty("classifier", "extra");
 
 		jar.putResource("META-INF/maven/pom.properties", new WriteResource() {
 
@@ -48,11 +50,14 @@ public class MavenCoordinatePluginTest {
 		final Processor p = new Processor();
 		plugin.setReporter(p);
 
-		final Map<String, Object> r = (Map<String, Object>) plugin.extract(jar, Locale.forLanguageTag("und"));
+		final MavenCoordinatesDTO dto = (MavenCoordinatesDTO) plugin.extract(jar, Locale.forLanguageTag("und"));
 
-		assertEquals(r.get("version"), "1.0.0");
-		assertEquals(r.get("groupId"), "com.test");
-		assertEquals(r.get("artifactId"), "test");
+		assertEquals(dto.version, "1.0.0");
+		assertEquals(dto.groupId, "com.test");
+		assertEquals(dto.artifactId, "test");
+		// assertEquals(dto.type, null);
+		assertEquals(dto.classifier, "extra");
 		assertTrue(p.isOk());
 	}
+
 }
