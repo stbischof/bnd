@@ -762,6 +762,83 @@ public class JtwigPrinterTest extends TestCase {
 			.check();
 	}
 
+	public void testGogoCommands() throws Exception {
+		TwigChecker checker = checker("_printGogoCommands");
+
+		checker.with(list(map().set("title", "titleScope")
+			.set("functions", list(map().set("title", "titleFunction1")
+				.set("methods", list(map().set("title", "titleMethod1")
+					.set("description", "descriptionOfMethod1")
+					.set("parameters", list(map().set("absentValue", "MyAbsendValue")
+						.set("presentValue", "MyAbsendValue")
+						.set("description", "MyParameterDescription")
+						.set("names", list("--a", "-AAAAA"))
+						.set("title", "TitlecouldBeNull")
+						.set("order", "0"))),
+					map().set("title", "titleMethod2")
+						.set("description", "descriptionOfMethod1")
+						.set("parameters", list(map().set("absentValue", "MyAbsendValue")
+							.set("presentValue", "MyAbsendValue")
+							.set("description", "MyParameterDescription")
+							.set("names", list("--a", "-AAAAA"))
+							.set("title", "TitlecouldBeNull")
+							.set("order", "0"),
+							map().set("absentValue", "MyAbsendValue2")
+								.set("presentValue", "MyAbsendValue2")
+								.set("description", "MyParameterDescription2")
+								.set("names", list("--b", "-BBBB"))
+								.set("title", "TitlecouldBeNull2")
+								.set("order", "1"))))),
+				map().set("title", "titleFunction2")
+					.set("methods", list(map().set("title", "titleMethod")
+						.set("description", "descriptionOfMethod1")
+						.set("parameters", list(map().set("absentValue", "MyAbsendValue")
+							.set("presentValue", "MyAbsendValue")
+							.set("description", "MyParameterDescription")
+							.set("names", list("--a", "-AAAAA"))
+							.set("title", "TitlecouldBeNull")
+							.set("order", "0"),
+							map().set("absentValue", "MyAbsendValue2")
+								.set("presentValue", "MyAbsendValue2")
+								.set("description", "MyParameterDescription2")
+								.set("names", list("--b", "-BBBB"))
+								.set("title", "TitlecouldBeNull2")
+								.set("order", "1")))))))))
+			.expect("### Gogo Commands")
+			.expectBlankLine()
+			.expectBlankLine()
+			.expect("#### Function:titleScope - titleFunction1")
+			.expectBlankLine()
+			.expect("**Command:** `titleScope:titleFunction1 --a $Value`")
+			.expect("descriptionOfMethod1")
+			.expectBlankLine()
+			.expect("|# |Parameters |Title |AbsentValue |PresentValue |Description |")
+			.expect("|--- |--- |--- |--- |--- |--- |")
+			.expect("|0  |`--a`, `-AAAAA` |TitlecouldBeNull |MyAbsendValue |MyAbsendValue |MyParameterDescription |")
+			.expectBlankLine()
+			.expect("**Command:** `titleScope:titleFunction1 --a $Value --b $Value`")
+			.expect("descriptionOfMethod1")
+			.expectBlankLine()
+			.expect("|# |Parameters |Title |AbsentValue |PresentValue |Description |")
+			.expect("|--- |--- |--- |--- |--- |--- |")
+			.expect("|0  |`--a`, `-AAAAA` |TitlecouldBeNull |MyAbsendValue |MyAbsendValue |MyParameterDescription |")
+			.expect("|1  |`--b`, `-BBBB` |TitlecouldBeNull2 |MyAbsendValue2 |MyAbsendValue2 |MyParameterDescription2 |")
+			.expectBlankLine()
+			.expectBlankLine()
+			.expect("#### Function:titleScope - titleFunction2")
+			.expectBlankLine()
+			.expect("**Command:** `titleScope:titleFunction2 --a $Value --b $Value`")
+			.expect("descriptionOfMethod1")
+			.expectBlankLine()
+			.expect("|# |Parameters |Title |AbsentValue |PresentValue |Description |")
+			.expect("|--- |--- |--- |--- |--- |--- |")
+			.expect("|0  |`--a`, `-AAAAA` |TitlecouldBeNull |MyAbsendValue |MyAbsendValue |MyParameterDescription |")
+			.expect("|1  |`--b`, `-BBBB` |TitlecouldBeNull2 |MyAbsendValue2 |MyAbsendValue2 |MyParameterDescription2 |")
+			.expectBlankLine()
+			.check();
+
+	}
+
 	public void testDevelopers() throws Exception {
 		TwigChecker checker = checker("printDevelopers");
 

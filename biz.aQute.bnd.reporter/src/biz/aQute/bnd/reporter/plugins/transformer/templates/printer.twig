@@ -341,6 +341,31 @@ No bindings.
 {%- endif -%}
 {%- endmacro %}
 
+{# 
+# GOGO COMMANDs
+#}
+{% macro _printGogoCommands (commandScopes) -%}
+{%- import _self as this -%}
+{%- if not commandScopes is empty -%}
+{{ this.printTitle('Gogo Commands',3) }}{{ '\n' }}
+{%- for scope in commandScopes %}
+{%- for function in scope.functions %}
+{{ '\n' }}{{ this.printTitle('Function:'~scope.title~' - '~function.title,4) }}{{ '\n' }}
+{%- for method in function.methods %}
+**Command:** `{{ scope.title }}:{{ function.title }}{%- for parameter in method.parameters %} {{  parameter.names[0]  }} $Value{%- endfor -%}`
+{% if not method.description is empty %}{{ method.description }}{{ '\n\n' }}{%- endif -%}
+
+{{ this.printTableHeaders(['#','Parameters','Title','AbsentValue','PresentValue','Description']) }}
+{%- for parameter in method.parameters %}
+|{{parameter.order}}  |{%- for name in parameter.names %}`{{name}}`{{ (loop.last) ? '' : ','}} {% endfor -%} |{{parameter.title}} |{{parameter.absentValue}} |{{parameter.presentValue}} |{{parameter.description}} |
+{%- endfor -%}
+{{ '\n' }}
+{%- endfor -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro %}
+
 
 {# 
 # DEVELOPERS
