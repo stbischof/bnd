@@ -19,17 +19,18 @@ public class ChecksumPluginTest {
 	@Test
 	public void testChecksumPlugin() throws IOException {
 		final ChecksumPlugin plugin = new ChecksumPlugin();
-		final Jar jar = new Jar("jar", new File("testresources/componentsEntry/source.jar"));
+		try (final Jar jar = new Jar("jar", new File("testresources/componentsEntry/source.jar"))) {
 
-		final Processor p = new Processor();
-		plugin.setReporter(p);
+			final Processor p = new Processor();
+			plugin.setReporter(p);
 
-		final ChecksumDTO dto = (ChecksumDTO) plugin.extract(jar, Locale.forLanguageTag("und"));
+			final ChecksumDTO dto = (ChecksumDTO) plugin.extract(jar, Locale.forLanguageTag("und"));
 
-		assertNotNull(dto.md5);
-		assertNotNull(dto.sha1);
-		assertNotNull(dto.sha256);
+			assertNotNull(dto.md5);
+			assertNotNull(dto.sha1);
+			assertNotNull(dto.sha256);
 
-		assertTrue(p.isOk());
+			assertTrue(p.isOk());
+		}
 	}
 }

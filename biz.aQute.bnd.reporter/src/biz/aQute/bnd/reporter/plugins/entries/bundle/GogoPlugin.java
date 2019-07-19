@@ -36,6 +36,7 @@ import aQute.bnd.osgi.Annotation;
 import aQute.bnd.osgi.Clazz;
 import aQute.bnd.osgi.Clazz.MethodParameter;
 import aQute.bnd.osgi.Constants;
+import aQute.bnd.osgi.Descriptors;
 import aQute.bnd.osgi.Descriptors.Descriptor;
 import aQute.bnd.osgi.Descriptors.TypeRef;
 import aQute.bnd.osgi.Jar;
@@ -72,9 +73,9 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 	final private static String			SCOPE						= "osgi.command.scope";
 	final private static String			FUNCTION					= "osgi.command.function";
 
-	final private static String			ANNOTOATION_NAME_DESCRIPTOR	= "org.apache.felix.service.command.Descriptor";
+	final private static String			ANNOTATION_NAME_DESCRIPTOR	= "org.apache.felix.service.command.Descriptor";
 
-	final private static String			ANNOTOATION_NAME_PARAMETER	= "org.apache.felix.service.command.Parameter";
+	final private static String			ANNOTATION_NAME_PARAMETER	= "org.apache.felix.service.command.Parameter";
 
 	private Reporter					_reporter;
 	private final Map<String, String>	_properties					= new HashMap<>();
@@ -286,7 +287,8 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 				gogoMethodDTO.parameters = Lists.newArrayList();
 
 				Optional<Annotation> oDescriptorAnnotation = m
-					.annotations(ANNOTOATION_NAME_DESCRIPTOR.replace(".", "/"))
+
+					.annotations(Descriptors.fqnToBinary(ANNOTATION_NAME_DESCRIPTOR))
 					.findFirst();
 
 				if (oDescriptorAnnotation.isPresent()) {
@@ -316,11 +318,11 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 
 						if (parameterAnnotation.parameter() == i) {
 
-							if (ANNOTOATION_NAME_DESCRIPTOR.equals(parameterAnnotation.getName()
+							if (ANNOTATION_NAME_DESCRIPTOR.equals(parameterAnnotation.getName()
 								.toString())) {
 
 								gogoParameterDTO.description = parameterAnnotation.get("value");
-							} else if (ANNOTOATION_NAME_PARAMETER.equals(parameterAnnotation.getName()
+							} else if (ANNOTATION_NAME_PARAMETER.equals(parameterAnnotation.getName()
 								.toString())) {
 
 								gogoParameterDTO.presentValue = parameterAnnotation.get("presentValue");
