@@ -18,7 +18,7 @@ public class MetatypesPluginTest extends TestCase {
 
 	public void testMetatype() throws Exception {
 
-		final Jar jar = new Jar("jar", "testresources/metatypesEntry/source.jar");
+		try (Jar jar = new Jar("jar", "testresources/metatypesEntry/source.jar")) {
 
 		final Processor p = new Processor();
 		final MetatypesPlugin e = new MetatypesPlugin();
@@ -42,5 +42,6 @@ public class MetatypesPluginTest extends TestCase {
 		}
 		ee.deleteCharAt(ee.length() - 1);
 		assertEquals(ee.toString(), new String(s.toByteArray()));
+		}
 	}
 }

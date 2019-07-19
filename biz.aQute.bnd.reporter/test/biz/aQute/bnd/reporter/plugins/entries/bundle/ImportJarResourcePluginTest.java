@@ -28,7 +28,7 @@ public class ImportJarResourcePluginTest {
 		plugin.setReporter(p);
 		plugin.setRegistry(p);
 
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		jar.getResources()
 			.put("myDir/file.cool", new EmbeddedResource("test=test", 0L));
 
@@ -40,6 +40,7 @@ public class ImportJarResourcePluginTest {
 		assertEquals("file", plugin.getProperties()
 			.get(ReportEntryPlugin.ENTRY_NAME_PROPERTY));
 		assertNotNull(plugin.extract(jar, Locale.forLanguageTag("und")));
-		assertTrue(p.isOk());
+			assertTrue(p.isOk());
+		}
 	}
 }

@@ -22,15 +22,16 @@ public class LocaleHelperTest {
 
 	@Test
 	public void testNotFound() {
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		assertNull(LocaleHelper.createIfPresent(jar, Locale.forLanguageTag("und"), "ln/bundle"));
 		jar.putResource("ln/bundle.properties", new PropResource());
-		assertNull(LocaleHelper.createIfPresent(jar, Locale.forLanguageTag("und"), "ln/other"));
+			assertNull(LocaleHelper.createIfPresent(jar, Locale.forLanguageTag("und"), "ln/other"));
+		}
 	}
 
 	@Test
 	public void testUnlocalized() {
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		final PropResource r = new PropResource();
 		r.add("key", "value");
 		jar.putResource("ln/bundle.properties", r);
@@ -38,12 +39,13 @@ public class LocaleHelperTest {
 		assertEquals("key", h.get("key"));
 		assertEquals("value", h.get("%key"));
 		assertNull(h.get("%  key"));
-		assertNull(h.get("%test"));
+			assertNull(h.get("%test"));
+		}
 	}
 
 	@Test
 	public void testLocalized() {
-		final Jar jar = new Jar("jar");
+				try (final Jar jar = new Jar("jar")) {
 
 		jar.putResource("ln/ignored.properties", new PropResource());
 
@@ -91,6 +93,7 @@ public class LocaleHelperTest {
 		assertNull(h.get("%key4", Locale.forLanguageTag("und")));
 
 		assertNull(h.get("%  key"));
-		assertNull(h.get("%test"));
+			assertNull(h.get("%test"));
+		}
 	}
 }

@@ -32,6 +32,7 @@ public class ManifestPluginTest {
 		assertTrue(p.isOk());
 		assertNotNull(result);
 		assertEquals("test", result.bundleName);
+		jar.close();
 
 		jar = new Jar("jar");
 		p = new Processor();
@@ -40,6 +41,7 @@ public class ManifestPluginTest {
 
 		assertTrue(p.isOk());
 		assertEquals(null, result);
+		jar.close();
 
 		jar = new Jar("jar");
 		manifest = new Manifest();
@@ -51,5 +53,7 @@ public class ManifestPluginTest {
 		assertTrue(p.isOk());
 		assertEquals("manifest", plugin.getProperties()
 			.get(ReportEntryPlugin.ENTRY_NAME_PROPERTY));
+		jar.close();
+
 	}
 }

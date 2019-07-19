@@ -43,32 +43,33 @@ public class ReportExporterTest extends TestCase {
 	}
 
 	public void testBasicExport() throws Exception {
-		final Jar jar = new Jar("jar");
-		final Manifest manifest = new Manifest();
-		jar.setManifest(manifest);
-		manifest.getMainAttributes()
-			.putValue("Bundle-SymbolicName", "test");
-		final Processor processor = new Processor();
+		try (final Jar jar = new Jar("jar")) {
+			final Manifest manifest = new Manifest();
+			jar.setManifest(manifest);
+			manifest.getMainAttributes()
+				.putValue("Bundle-SymbolicName", "test");
+			final Processor processor = new Processor();
 
-		processor.setProperty(ReportExporterConstants.EXPORT_REPORT_INSTRUCTION, "readme.json");
+			processor.setProperty(ReportExporterConstants.EXPORT_REPORT_INSTRUCTION, "readme.json");
 
-		final Map<String, Resource> result = ReportExporterBuilder.create()
-			.setProcessor(processor)
-			.build()
-			.exportReportsOf(jar);
+			final Map<String, Resource> result = ReportExporterBuilder.create()
+				.setProcessor(processor)
+				.build()
+				.exportReportsOf(jar);
 
-		assertEquals(1, result.size());
-		assertTrue(result.values()
-			.stream()
-			.findFirst()
-			.get()
-			.buffer()
-			.array().length > 0);
-		assertTrue(processor.isOk());
+			assertEquals(1, result.size());
+			assertTrue(result.values()
+				.stream()
+				.findFirst()
+				.get()
+				.buffer()
+				.array().length > 0);
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithTemplate() throws Exception {
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -93,11 +94,12 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithDefaultTemplate() throws Exception {
-		final Jar jar = new Jar("jar");
+				try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -122,11 +124,12 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()).startsWith("# test"));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithTemplateOverride() throws Exception {
-		final Jar jar = new Jar("jar");
+				try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -151,11 +154,12 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithTemplateUnknowType() throws Exception {
-		final Jar jar = new Jar("jar");
+				try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -180,11 +184,12 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithTemplateParameter() throws Exception {
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -209,11 +214,12 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 
 	public void testExportWithConfigName() throws Exception {
-		final Jar jar = new Jar("jar");
+				try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -240,6 +246,7 @@ public class ReportExporterTest extends TestCase {
 			.get()
 			.buffer()
 			.array()).contains("valueTest"));
-		assertTrue(processor.isOk());
+			assertTrue(processor.isOk());
+		}
 	}
 }

@@ -21,7 +21,7 @@ public class MavenCoordinatePluginTest {
 	@Test
 	public void testMavenCoordinatePlugin() {
 		final MavenCoordinatePlugin plugin = new MavenCoordinatePlugin();
-		final Jar jar = new Jar("jar");
+		try (final Jar jar = new Jar("jar")) {
 		final Manifest manifest = new Manifest();
 		jar.setManifest(manifest);
 		manifest.getMainAttributes()
@@ -57,7 +57,8 @@ public class MavenCoordinatePluginTest {
 		assertEquals(dto.artifactId, "test");
 		// assertEquals(dto.type, null);
 		assertEquals(dto.classifier, "extra");
-		assertTrue(p.isOk());
+			assertTrue(p.isOk());
+		}
 	}
 
 }

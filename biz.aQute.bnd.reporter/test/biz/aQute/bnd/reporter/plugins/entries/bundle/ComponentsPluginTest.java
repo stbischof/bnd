@@ -18,7 +18,7 @@ public class ComponentsPluginTest extends TestCase {
 
 	public void testComponents() throws Exception {
 
-		final Jar jar = new Jar("jar", "testresources/componentsEntry/source.jar");
+		try (final Jar jar = new Jar("jar", "testresources/componentsEntry/source.jar")) {
 		final Processor p = new Processor();
 		final ComponentsPlugin e = new ComponentsPlugin();
 		final Map<String, Object> result = new HashMap<>();
@@ -41,6 +41,7 @@ public class ComponentsPluginTest extends TestCase {
 		}
 		ee.deleteCharAt(ee.length() - 1);
 
-		assertEquals(ee.toString(), new String(s.toByteArray()));
+			assertEquals(ee.toString(), new String(s.toByteArray()));
+		}
 	}
 }
