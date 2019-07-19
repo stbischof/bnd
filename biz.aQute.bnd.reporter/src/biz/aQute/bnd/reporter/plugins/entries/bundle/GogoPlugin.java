@@ -86,7 +86,7 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 	}
 
 	@Override
-	public Object extract(final Jar jar, final Locale locale) throws Exception {
+	public List<GogoScopeDTO> extract(final Jar jar, final Locale locale) throws Exception {
 		Objects.requireNonNull(jar, "jar");
 		Objects.requireNonNull(locale, "locale");
 
@@ -234,6 +234,7 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 
 						} else {
 							gogoScopeDTO = new GogoScopeDTO();
+							gogos.add(gogoScopeDTO);
 							gogoScopeDTO.title = scope;
 							gogoScopeDTO.functions = new ArrayList<GogoFunctionDTO>();
 
@@ -251,6 +252,7 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 								gogoFunctionDTO = optionalF.get();
 							} else {
 								gogoFunctionDTO = new GogoFunctionDTO();
+								gogoScopeDTO.functions.add(gogoFunctionDTO);
 								gogoFunctionDTO.title = function;
 								gogoFunctionDTO.methods = new ArrayList<GogoMethodDTO>();
 							}
@@ -260,9 +262,7 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 							clazz.parseClassFile();
 							gogoFunctionDTO.methods.addAll(createMethodDTO(clazz, function));
 
-							gogoScopeDTO.functions.add(gogoFunctionDTO);
 						}
-						gogos.add(gogoScopeDTO);
 					}
 				} else {
 					if (!path.contains("*")) {
@@ -308,7 +308,6 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 				for (int i = 0; i < trs.length; i++) {
 
 					GogoParameterDTO gogoParameterDTO = new GogoParameterDTO();
-					gogoParameterDTO.order = i;
 
 					if (mps != null && i < mps.length) {
 						gogoParameterDTO.title = mps[i].getName();

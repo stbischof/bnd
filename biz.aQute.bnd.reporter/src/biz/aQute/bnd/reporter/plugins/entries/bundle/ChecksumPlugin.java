@@ -32,7 +32,7 @@ public class ChecksumPlugin implements ReportEntryPlugin<Jar>, Plugin {
 	}
 
 	@Override
-	public Object extract(final Jar jar, final Locale locale) {
+	public ChecksumDTO extract(final Jar jar, final Locale locale) {
 		Objects.requireNonNull(jar, "jar");
 		Objects.requireNonNull(locale, "locale");
 

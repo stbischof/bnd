@@ -757,7 +757,7 @@ public class JtwigPrinterTest extends TestCase {
 	}
 
 	public void testComponentReferences() throws Exception {
-		TwigChecker checker = checker("_printComponentReferneces");
+		TwigChecker checker = checker("_printComponentReferences");
 
 		checker.with(map())
 			.expect("#### Reference bindings")

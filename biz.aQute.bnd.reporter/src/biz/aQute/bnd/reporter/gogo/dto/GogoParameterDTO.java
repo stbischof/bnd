@@ -7,11 +7,6 @@ import org.osgi.dto.DTO;
 public class GogoParameterDTO extends DTO {
 
 	/**
-	 * The order of the parameter.
-	 */
-	public int		order;
-
-	/**
 	 * Title of this parameter.(optional)
 	 */
 	public String	title;

@@ -127,7 +127,7 @@
 
 {{ this._printComponentConfiguration(c, metatypes) }}
 
-{{ this._printComponentReferneces(c) }}
+{{ this._printComponentReferences(c) }}
 {%- endfor -%}
 {%- endmacro %}
 
@@ -335,7 +335,7 @@ No information available.
 {# 
 # COMPONENT REFERENCES
 #}
-{% macro _printComponentReferneces (c) -%}
+{% macro _printComponentReferences (c) -%}
 {%- import _self as this -%}
 {{ this.printTitle('Reference bindings',4) }}{{ '\n\n' }}
 
