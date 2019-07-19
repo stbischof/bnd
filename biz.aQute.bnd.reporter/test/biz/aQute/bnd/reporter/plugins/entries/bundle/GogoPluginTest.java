@@ -18,33 +18,34 @@ public class GogoPluginTest extends TestCase {
 
 	public void testComponents() throws Exception {
 
-		try (final Jar jar = new Jar("jar", "testresources/gogoEntry/source.jar")) {
-		final Processor p = new Processor();
-		final GogoPlugin e = new GogoPlugin();
-		final Map<String, Object> result = new HashMap<>();
-		e.setReporter(p);
+		try (final Jar jar = new Jar("jar", "testresources/gogoEntry/source.jar");
+			final Processor p = new Processor()) {
 
-		result.put(e.getProperties()
-			.get(ReportEntryPlugin.ENTRY_NAME_PROPERTY), e.extract(jar, Locale.forLanguageTag("und")));
+			final GogoPlugin e = new GogoPlugin();
+			final Map<String, Object> result = new HashMap<>();
+			e.setReporter(p);
 
-		assertTrue(p.isOk());
+			result.put(e.getProperties()
+				.get(ReportEntryPlugin.ENTRY_NAME_PROPERTY), e.extract(jar, Locale.forLanguageTag("und")));
 
-		final ByteArrayOutputStream s = new ByteArrayOutputStream();
-		new JsonReportSerializerPlugin().serialize(result, s);
+			assertTrue(p.isOk());
 
-		// TODO: remove output
+			final ByteArrayOutputStream s = new ByteArrayOutputStream();
+			new JsonReportSerializerPlugin().serialize(result, s);
 
-		System.out.println(new String(s.toByteArray()));
-		final StringBuffer ee = new StringBuffer();
+			// TODO: remove output
 
-		for (final String l : Files.readAllLines(Paths.get("testresources/gogoEntry/result.json"),
-			StandardCharsets.UTF_8)) {
+			System.out.println(new String(s.toByteArray()));
+			final StringBuffer ee = new StringBuffer();
 
-			ee.append(l + "\n");
-		}
-		ee.deleteCharAt(ee.length() - 1);
+			for (final String l : Files.readAllLines(Paths.get("testresources/gogoEntry/result.json"),
+				StandardCharsets.UTF_8)) {
 
-		assertEquals(ee.toString(), new String(s.toByteArray()));
+				ee.append(l + "\n");
+			}
+			ee.deleteCharAt(ee.length() - 1);
+
+			assertEquals(ee.toString(), new String(s.toByteArray()));
 		}
 	}
 }

@@ -19,9 +19,9 @@ public class ChecksumPluginTest {
 	@Test
 	public void testChecksumPlugin() throws IOException {
 		final ChecksumPlugin plugin = new ChecksumPlugin();
-		try (final Jar jar = new Jar("jar", new File("testresources/componentsEntry/source.jar"))) {
+		try (final Jar jar = new Jar("jar", new File("testresources/componentsEntry/source.jar"));
+			Processor p = new Processor()) {
 
-			final Processor p = new Processor();
 			plugin.setReporter(p);
 
 			final ChecksumDTO dto = (ChecksumDTO) plugin.extract(jar, Locale.forLanguageTag("und"));
@@ -31,6 +31,7 @@ public class ChecksumPluginTest {
 			assertNotNull(dto.sha256);
 
 			assertTrue(p.isOk());
+
 		}
 	}
 }

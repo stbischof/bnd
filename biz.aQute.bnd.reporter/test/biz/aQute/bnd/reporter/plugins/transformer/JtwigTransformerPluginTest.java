@@ -21,22 +21,23 @@ public class JtwigTransformerPluginTest extends TestCase {
 		report.put("test", "test");
 		parameters.put("param1", "param");
 
-		final ByteArrayOutputStream model = new ByteArrayOutputStream();
-		new JsonReportSerializerPlugin().serialize(report, model);
+		try (final ByteArrayOutputStream model = new ByteArrayOutputStream()) {
+			new JsonReportSerializerPlugin().serialize(report, model);
 
-		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+			final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-		t.transform(IO.stream(model.toByteArray()),
-			IO.stream(new File("testresources/transformer/jtwigTransformer.twig")), output, parameters);
+			t.transform(IO.stream(model.toByteArray()),
+				IO.stream(new File("testresources/transformer/jtwigTransformer.twig")), output, parameters);
 
-		assertTrue(new String(output.toByteArray()).contains("test"));
+			assertTrue(new String(output.toByteArray()).contains("test"));
 
-		assertArrayEquals(t.getHandledModelExtensions(), new String[] {
-			"json"
-		});
-		assertArrayEquals(t.getHandledTemplateExtensions(), new String[] {
-			"twig", "jtwig"
-		});
+			assertArrayEquals(t.getHandledModelExtensions(), new String[] {
+				"json"
+			});
+			assertArrayEquals(t.getHandledTemplateExtensions(), new String[] {
+				"twig", "jtwig"
+			});
+		}
 	}
 
 	public void testJtwigTransformerDefault() throws Exception {
@@ -50,16 +51,16 @@ public class JtwigTransformerPluginTest extends TestCase {
 		manifest.put("bundleSymbolicName", bundleSymbolicName);
 		report.put("manifest", manifest);
 
-		final ByteArrayOutputStream model = new ByteArrayOutputStream();
-		new JsonReportSerializerPlugin().serialize(report, model);
+		try (final ByteArrayOutputStream model = new ByteArrayOutputStream()) {
+			new JsonReportSerializerPlugin().serialize(report, model);
 
-		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+			final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-		t.transform(IO.stream(model.toByteArray()),
-			JtwigTransformerPlugin.class.getResourceAsStream("templates/readme.twig"),
-			output,
-			new HashMap<String, String>());
+			t.transform(IO.stream(model.toByteArray()),
+				JtwigTransformerPlugin.class.getResourceAsStream("templates/readme.twig"), output,
+				new HashMap<String, String>());
 
-		assertTrue(new String(output.toByteArray()).contains("# test"));
+			assertTrue(new String(output.toByteArray()).contains("# test"));
+		}
 	}
 }
