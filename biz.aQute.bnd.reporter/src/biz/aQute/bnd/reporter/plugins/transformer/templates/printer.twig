@@ -361,19 +361,48 @@ No bindings.
 {% macro _printGogoCommands (commandScopes) -%}
 {%- import _self as this -%}
 {%- if not commandScopes is empty -%}
-{{ this.printTitle('Gogo Commands',3) }}{{ '\n' }}
 {%- for scope in commandScopes %}
 {%- for function in scope.functions %}
-{{ '\n' }}{{ this.printTitle('Function:'~scope.title~' - '~function.title,4) }}{{ '\n' }}
-{%- for method in function.methods %}
-**Command:** `{{ scope.title }}:{{ function.title }}{%- for parameter in method.parameters %} {{  parameter.names[0]  }} $Value{%- endfor -%}`
-{% if not method.description is empty %}{{ method.description }}{{ '\n\n' }}{%- endif -%}
+{{ '\n' }}{{ this.printTitle(scope.title~':'~function.title,3) }}{{ '\n' }}
+{% for method in function.methods %}
+**Synopsis**
+`{{ scope.title }}:{{ function.title }} [OPTIONS] 
+{%- if not method.parameters  is null -%}
+{%- for parameter in method.parameters -%}
+{%- if parameter.names is empty -%}
+{%- if parameter.title is empty -%}{{- ' arg'~loop.index0 }}{%- else -%}{{ ' '~parameter.title}}{%- endif %}
+{%- endif -%}
+{%- endfor -%}`
+{%- endif %}
 
-{{ this.printTableHeaders(['#','Parameters','Title','AbsentValue','PresentValue','Description']) }}
+**Description**
+{% if method.description is null %} none {%- else -%} {{ method.description }}{%- endif %}
+
+**Arguments**
+{% set argFound = false -%}
 {%- for parameter in method.parameters %}
-|{{parameter.order}}  |{%- for name in parameter.names %}`{{name}}`{{ (loop.last) ? '' : ','}} {% endfor -%} |{{parameter.title}} |{{parameter.absentValue}} |{{parameter.presentValue}} |{{parameter.description}} |
+{%- if parameter.names is null -%}
+{%- set argFound = true -%}
+* `{% if parameter.title is empty -%}{{- 'arg'~loop.index0 }}{%- else -%}{{parameter.title}}{%- endif %}` {{parameter.description}} {{ '\n' }} 
+{%- endif -%}
 {%- endfor -%}
+{%- if argFound == false -%}
+none
+{% endif %}
+**Options**
+{% set optionFound = false -%}
+{%- for parameter in method.parameters %}
+{%- set argNum = loop.index0 -%}
+{%- if parameter.names is not null -%}
+{%- set optionFound = true -%}
+* `{%- for name in parameter.names %}{{ name }}{% if parameter.presentValue is null -%}{% if parameter.title is null -%}{{- 'arg'~argNum }}{%- else -%}{{parameter.title}}{%- endif %}{%- endif -%}{{ (loop.last) ? '' : ', '}}{% endfor %}{{ '` '~parameter.description~'\n' -}} 
+{%- endif -%}
+{%- endfor -%}
+{%- if optionFound == false -%}
+none
+{% endif -%}
 {{ '\n' }}
+{{-  '---' -}}
 {%- endfor -%}
 {%- endfor -%}
 {%- endfor -%}

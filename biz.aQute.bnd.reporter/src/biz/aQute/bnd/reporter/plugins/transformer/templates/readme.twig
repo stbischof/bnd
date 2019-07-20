@@ -62,6 +62,12 @@
 {{ blocks.codeUsageBlock(printer, report) }}
 {%- endblock -%}
 
+{%- block beforeGogoCommands %}{% endblock -%}
+
+{%- block gogoCommands -%}
+{{ blocks.gogoCommandsBlock(printer, report) }}
+{%- endblock -%}
+
 {%- block beforeComponents %}{% endblock -%}
 
 {%- block components -%}

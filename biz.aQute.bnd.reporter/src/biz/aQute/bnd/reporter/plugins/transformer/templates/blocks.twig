@@ -167,6 +167,17 @@ Visit [{{ download }}]({{ download }}).
 {# 
 # COMPONENTS
 #}
+{% macro gogoCommandsBlock (printer, report, iconUrl) -%}
+{%- if not empty(report.gogoCommands) -%}
+{{ '\n\n' }}{{ printer.printTitle('Gogo Commands',2, iconUrl) }}
+
+{{ printer._printGogoCommands(report.gogoCommands) }}
+{%- endif -%}
+{%- endmacro %}
+
+{# 
+# COMPONENTS
+#}
 {% macro componentsBlock (printer, report, iconUrl) -%}
 {%- if not empty(report.components) -%}
 {{ '\n\n' }}{{ printer.printTitle('Components',2, iconUrl) }}
