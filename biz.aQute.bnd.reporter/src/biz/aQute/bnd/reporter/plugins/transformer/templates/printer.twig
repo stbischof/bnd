@@ -395,7 +395,7 @@ none
 {%- set argNum = loop.index0 -%}
 {%- if parameter.names is not null -%}
 {%- set optionFound = true -%}
-* `{%- for name in parameter.names %}{{ name }}{% if parameter.presentValue is null -%}{% if parameter.title is null -%}{{- 'arg'~argNum }}{%- else -%}{{parameter.title}}{%- endif %}{%- endif -%}{{ (loop.last) ? '' : ', '}}{% endfor %}{{ '` '~parameter.description~'\n' -}} 
+* `{%- for name in parameter.names %}{{ name }}{% if parameter.presentValue is null -%}{% if parameter.title is null -%}{{- ' arg'~argNum }}{%- else -%}{{' '~parameter.title}}{%- endif %}{%- endif -%}{{ (loop.last) ? '' : ', '}}{% endfor %}{{ '` '~parameter.description~'\n' -}} 
 {%- endif -%}
 {%- endfor -%}
 {%- if optionFound == false -%}
