@@ -419,7 +419,7 @@ No bindings.
 {%- if not options  is empty -%}
 **Options**
 {% for option in options -%}
-* `{%- for name in option.names %}{{ name }} {{ (option.optionArg)? option.title:''}}{{ (loop.last )? '' : ', '}}{%- endfor -%}`{{(option.description is empty)?'':' '~option.description}} 
+* `{%- for name in option.names %}{{ name }} {{ (option.optionArg)? option.title:''}}{{ (loop.last )? '' : ', '}}{%- endfor -%}`{{(option.description is empty)?'':' '~option.description}}
 {% endfor -%}
 {%- endif -%}
 {{ '\n' }}
