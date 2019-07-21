@@ -361,48 +361,70 @@ No bindings.
 {% macro _printGogoCommands (commandScopes) -%}
 {%- import _self as this -%}
 {%- if not commandScopes is empty -%}
-{%- for scope in commandScopes %}
-{%- for function in scope.functions %}
-{{ '\n' }}{{ this.printTitle(scope.title~':'~function.title,3) }}{{ '\n' }}
-{% for method in function.methods %}
-**Synopsis**
-`{{ scope.title }}:{{ function.title }} [OPTIONS] 
+{%- for scope in commandScopes -%}
+{%- for function in scope.functions -%}
+{{ this.printTitle(scope.title~':'~function.title,3) }}{{ '\n' }}
+{%- for method in function.methods -%}
+
+{# pre-calculate arguments #}
+{%- set arguments = [] -%}
+{%- set options = [] -%}
+
 {%- if not method.parameters  is null -%}
 {%- for parameter in method.parameters -%}
-{%- if parameter.names is empty -%}
-{%- if parameter.title is empty -%}{{- ' arg'~loop.index0 }}{%- else -%}{{ ' '~parameter.title}}{%- endif %}
+
+{%- set tmpTitle = (parameter.title is empty) ? 'arg'~loop.index0: parameter.title -%}
+{%- set tmpDescription = (parameter.description is empty) ? '': parameter.description -%}
+
+
+{%- set tmpType = (parameter.type matches '.*]') ? true : false -%}
+{%- set tmpNames = (parameter.names is null ) ? null : parameter.names -%}
+
+{%- set tmpTitle = tmpTitle|upper-%}
+{%- if tmpType == true -%}{%- set tmpTitle = tmpTitle~'...'-%}{%- endif -%}
+
+{%- set tmpOptionArg = (parameter.presentValue is null) ? true : false %}
+
+{%- set tmpArg = {'title':tmpTitle,'description':tmpDescription,'type':tmpType,'names':tmpNames,'optionArg':tmpOptionArg} %}
+
+{%- if tmpNames is null -%}
+{% set arguments = arguments|merge([tmpArg]) %}
+{%- else -%}
+{%- set options = options|merge([tmpArg]) -%}
+
 {%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+{{- '\n' -}}
+**Synopsis**
+`{{ scope.title }}:{{ function.title }}{{( options is empty )?'' : ' [OPTIONS]' }}
+{%- if not arguments  is empty -%}
+{%- for argument in arguments -%}
+{{ ' '~argument.title}}
 {%- endfor -%}`
-{%- endif %}
-
+{%- endif -%}
+{{ '\n\n' }}
+{%- if not method.description is null -%}
 **Description**
-{% if method.description is null %} none {%- else -%} {{ method.description }}{%- endif %}
+{{  method.description }}{{ '\n\n' }}
+{%- endif -%}
 
+{%- if not arguments  is empty -%}
 **Arguments**
-{% set argFound = false -%}
-{%- for parameter in method.parameters %}
-{%- if parameter.names is null -%}
-{%- set argFound = true -%}
-* `{% if parameter.title is empty -%}{{- 'arg'~loop.index0 }}{%- else -%}{{parameter.title}}{%- endif %}` {{parameter.description}} {{ '\n' }} 
+{% for argument in arguments -%}
+{{- '* `'~argument.title }}`{{(argument.description is empty)?'':' '~argument.description}}
+{% endfor -%}
+{{- '\n' }}
 {%- endif -%}
-{%- endfor -%}
-{%- if argFound == false -%}
-none
-{% endif %}
+{%- if not options  is empty -%}
 **Options**
-{% set optionFound = false -%}
-{%- for parameter in method.parameters %}
-{%- set argNum = loop.index0 -%}
-{%- if parameter.names is not null -%}
-{%- set optionFound = true -%}
-* `{%- for name in parameter.names %}{{ name }}{% if parameter.presentValue is null -%}{% if parameter.title is null -%}{{- ' arg'~argNum }}{%- else -%}{{' '~parameter.title}}{%- endif %}{%- endif -%}{{ (loop.last) ? '' : ', '}}{% endfor %}{{ '` '~parameter.description~'\n' -}} 
+{% for option in options -%}
+* `{%- for name in option.names %}{{ name }} {{ (option.optionArg)? option.title:''}}{{ (loop.last )? '' : ', '}}{%- endfor -%}`{{(option.description is empty)?'':' '~option.description}} 
+{% endfor -%}
 {%- endif -%}
-{%- endfor -%}
-{%- if optionFound == false -%}
-none
-{% endif -%}
 {{ '\n' }}
 {{-  '---' -}}
+{{ '\n' }}
 {%- endfor -%}
 {%- endfor -%}
 {%- endfor -%}

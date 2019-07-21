@@ -308,7 +308,9 @@ public class GogoPlugin implements ReportEntryPlugin<Jar>, Plugin {
 				for (int i = 0; i < trs.length; i++) {
 
 					GogoParameterDTO gogoParameterDTO = new GogoParameterDTO();
+					TypeRef tr = trs[i];
 
+					gogoParameterDTO.type = tr.getShortName();
 					if (mps != null && i < mps.length) {
 						gogoParameterDTO.title = mps[i].getName();
 					}

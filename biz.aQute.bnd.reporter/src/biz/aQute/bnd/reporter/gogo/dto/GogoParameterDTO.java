@@ -32,4 +32,9 @@ public class GogoParameterDTO extends DTO {
 	 * List of names of this parameter.(optional)
 	 */
 	public List<String>	names;
+
+	/**
+	 * Type of this parameter.(optional)
+	 */
+	public String		type;
 }
