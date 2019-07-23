@@ -7,6 +7,8 @@ import java.util.Dictionary;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.AutoCloseableSoftAssertions;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
@@ -30,13 +32,27 @@ public class BundleBuilderTest {
 		}
 	}
 
-	LaunchpadBuilder builder = new LaunchpadBuilder().runfw("org.apache.felix.framework");
+	LaunchpadBuilder builder;
+
+	@Before
+	public void before() throws Exception {
+		builder = new LaunchpadBuilder();
+		builder.runfw("org.apache.felix.framework");
+		assertThat(builder.getLocal().runfw).as("runfw")
+			.isNotEmpty();
+	}
+
+	@After
+	public void after() throws Exception {
+		builder.close();
+	}
 
 	@Test
 	public void testInherit() throws Exception {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.header("-require-bnd", "'(version>=4.3.0)'")
 				.privatePackage("")
 				.exportPackage("")
@@ -50,6 +66,7 @@ public class BundleBuilderTest {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.workspace()
 				.start();
 			testHeader(bundle, "Workspace", "true");
@@ -60,6 +77,7 @@ public class BundleBuilderTest {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.project()
 				.privatePackage("") // remove any packages defined in the
 				.exportPackage("") // project file
@@ -72,6 +90,7 @@ public class BundleBuilderTest {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.parent("testresources/inherit.bnd")
 				.privatePackage("")
 				.exportPackage("")
@@ -84,6 +103,7 @@ public class BundleBuilderTest {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.parent("testresources/inherit.bnd")
 				.project()
 				.privatePackage("")
@@ -97,6 +117,7 @@ public class BundleBuilderTest {
 		try (Launchpad lp = builder.create()) {
 
 			Bundle bundle = lp.bundle()
+				.header("-removeheaders.launchpadtest", "")
 				.parent("testresources/inherit.bnd")
 				.workspace()
 				.privatePackage("")
@@ -112,7 +133,7 @@ public class BundleBuilderTest {
 	private void testHeader(Bundle bundle, String key, String value) {
 		Dictionary<String, String> headers = bundle.getHeaders();
 
-		assertThat(headers.get(key)).isEqualTo(value);
+		assertThat(headers.get(key)).isEqualToIgnoringWhitespace(value);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -235,6 +256,36 @@ public class BundleBuilderTest {
 			softly.assertThat(bundle.getLocation())
 				.as("explicit location")
 				.isEqualTo("some string");
+		}
+	}
+
+	@Test
+	public void bsn_defaultsToLaunchpadName() throws Exception {
+		try (AutoCloseableSoftAssertions softly = new AutoCloseableSoftAssertions()) {
+			try (Launchpad lp = builder.debug()
+				.create()) {
+				Bundle bundle1 = lp.bundle()
+					.install();
+				softly.assertThat(bundle1.getSymbolicName())
+					.as("full default")
+					.startsWith(lp.getClassName() + "." + lp.getName());
+
+				Bundle bundle2 = lp.bundle()
+					.install();
+
+				softly.assertThat(bundle2.getSymbolicName())
+					.as("full default 2")
+					.startsWith(lp.getClassName() + "." + lp.getName())
+					.isNotEqualTo(bundle1.getSymbolicName());
+			}
+			try (Launchpad lp = builder.debug()
+				.create("& noncompliant name", "Unfriendly . class .& ..name")) {
+				Bundle unfriendlyBundle = lp.bundle()
+					.install();
+				softly.assertThat(unfriendlyBundle.getSymbolicName())
+					.as("unfriendly bundle")
+					.startsWith("Unfriendly.class.name.noncompliantname");
+			}
 		}
 	}
 
