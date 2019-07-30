@@ -178,11 +178,11 @@ Visit [{{ download }}]({{ download }}).
 {# 
 # COMPONENTS
 #}
-{% macro componentsBlock (printer, report, iconUrl) -%}
+{% macro componentsBlock (printer, report, iconUrl, allParameters) -%}
 {%- if not empty(report.components) -%}
 {{ '\n\n' }}{{ printer.printTitle('Components',2, iconUrl) }}
 
-{{ printer.printComponents(report.components, report.metatypes) }}
+{{ printer.printComponents(report.components, report.metatypes, allParameters) }}
 {%- endif -%}
 {%- endmacro %}
 

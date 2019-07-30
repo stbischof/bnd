@@ -115,7 +115,7 @@
 {# 
 # COMPONENTS
 #}
-{% macro printComponents (components, metatypes) -%}
+{% macro printComponents (components, metatypes, allParameters) -%}
 {%- import _self as this -%}
 {%- for c in components -%}
 {%- if not (loop.first) -%}{{ '\n\n---\n\n' }}{%- endif -%}
@@ -128,6 +128,11 @@
 {{ this._printComponentConfiguration(c, metatypes) }}
 
 {{ this._printComponentReferences(c) }}
+
+{%- if showSection("sectionName", false, allParameters) %}
+
+{{ this._printComponentJsonConfiguratorSnippet(c, metatypes) }}
+{%- endif -%}
 {%- endfor -%}
 {%- endmacro %}
 
