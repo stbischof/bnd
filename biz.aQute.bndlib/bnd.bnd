@@ -73,10 +73,11 @@ Import-Package: \
 	org.osgi.service.repository;version=latest,\
 	org.osgi.util.function;version=latest,\
 	org.osgi.util.promise;version=latest,\
-	aQute.libg;version=project, \
+	aQute.libg;version=project,\
 	biz.aQute.bnd.annotation;version=project,\
 	biz.aQute.bnd.util;version=latest;maven-scope=compile,\
-	slf4j.api;version=latest;maven-scope=compile
+	slf4j.api;version=latest;maven-scope=compile,\
+	org.osgi.util.feature
 
 -testpath: \
     ${junit},\
