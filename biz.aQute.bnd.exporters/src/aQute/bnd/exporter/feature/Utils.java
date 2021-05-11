@@ -1,10 +1,6 @@
 package aQute.bnd.exporter.feature;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import org.osgi.util.feature.Feature;
 import org.osgi.util.feature.FeatureBundle;
@@ -13,10 +9,10 @@ import org.osgi.util.feature.Features;
 import org.osgi.util.feature.ID;
 
 import aQute.bnd.build.Container;
+import aQute.bnd.exporter.feature.json.FeatureIDJsonHandler;
+import aQute.bnd.exporter.feature.json.FeatureJsonHandler;
 import aQute.bnd.osgi.Jar;
 import aQute.bnd.osgi.Processor;
-import aQute.lib.json.Encoder;
-import aQute.lib.json.Handler;
 import aQute.lib.json.JSONCodec;
 import biz.aQute.bnd.reporter.maven.dto.ChecksumDTO;
 import biz.aQute.bnd.reporter.maven.dto.MavenCoordinatesDTO;
@@ -78,43 +74,12 @@ public class Utils {
 
 		JSONCodec jsonCodec = new JSONCodec();
 
-		jsonCodec.addHandler(Feature.class, new Handler() {
+		jsonCodec.addHandler(Feature.class, new FeatureJsonHandler());
 
-			@Override
-			public void encode(Encoder app, Object object, Map<Object, Type> visited) throws IOException, Exception {
-				Feature f = (Feature) object;
-
-				Map<String, Object> map = new HashMap<>();
-				// map.put("bundles", f.getBundles());
-				map.put("id", f.getID());
-
-				app.encode(map, Map.class, visited);
-			}
-
-		});
-
-		jsonCodec.addHandler(ID.class, new Handler() {
-
-			@Override
-			public void encode(Encoder app, Object object, Map<Object, Type> visited) throws IOException, Exception {
-				ID i = (ID) object;
-				Map<String, Object> map = new HashMap<>();
-				map.put("groupID", i.getGroupId());
-				map.put("artifactId", i.getArtifactId());
-				map.put("version", i.getVersion());
-				map.put("classifier", i.getClassifier());
-				map.put("type", i.getType());
-
-
-				app.encode(map, Map.class, visited);
-
-			}
-
-		});
+		jsonCodec.addHandler(ID.class, new FeatureIDJsonHandler());
 
 		String s = jsonCodec.enc()
 			.indent("  ")
-			.linebreak("//\n")
 			.put(f)
 			.toString();
 		return s;

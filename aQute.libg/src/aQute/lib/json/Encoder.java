@@ -171,14 +171,14 @@ public class Encoder implements Appendable, Closeable, Flushable {
 		return this;
 	}
 
-	void undent() throws IOException {
+	public void undent() throws IOException {
 		if (tabs != null) {
 			indent = indent.substring(tabs.length());
 		}
 		linebreak();
 	}
 
-	void linebreak() throws IOException {
+	public void linebreak() throws IOException {
 		if (linebreak != null) {
 			app.append(linebreak);
 			if (tabs != null) {
@@ -187,7 +187,7 @@ public class Encoder implements Appendable, Closeable, Flushable {
 		}
 	}
 
-	void indent() throws IOException {
+	public void indent() throws IOException {
 		if (tabs != null) {
 			indent += tabs;
 		}
