@@ -1207,7 +1207,8 @@ public class JSONTest extends TestCase {
 	}
 
 	public void testInheritHandler() throws Exception {
-		I i = new II();
+
+		II ii = new II();
 
 		AtomicBoolean match = new AtomicBoolean(false);
 		JSONCodec jsonCodec = new JSONCodec();
@@ -1221,7 +1222,7 @@ public class JSONTest extends TestCase {
 
 		});
 		jsonCodec.enc()
-			.put(i);
+			.put(ii);
 		assertTrue(match.get());
 	}
 }
