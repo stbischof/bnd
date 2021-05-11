@@ -2,7 +2,8 @@
 -include: ${workspace}/cnf/includes/jdt.bnd
 
 -exportcontents: \
-	aQute.bnd.exporter.subsystem
+	aQute.bnd.exporter.subsystem,\
+	aQute.bnd.exporter.feature
 
 -conditionalpackage: \
 	aQute.lib.*;-split-package:=first, \
@@ -14,11 +15,14 @@
 	aQute.libg;version=project,\
 	biz.aQute.bnd.util;version=latest,\
 	biz.aQute.bndlib;version=latest,\
-	slf4j.api;version=latest
+	slf4j.api;version=latest,\
+	org.osgi.util.feature,\
+	biz.aQute.bnd.reporter;version=latest
 
 -testpath: \
 	${junit},\
-	slf4j.simple;version=latest
+	slf4j.simple;version=latest,\
+	${mockito}
 
 -baseline: *
 

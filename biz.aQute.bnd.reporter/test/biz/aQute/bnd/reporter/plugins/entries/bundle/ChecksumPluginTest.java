@@ -32,7 +32,7 @@ public class ChecksumPluginTest {
 			assertNotNull(dto.sha512);
 
 			assertTrue(p.isOk());
-
 		}
+
 	}
 }
