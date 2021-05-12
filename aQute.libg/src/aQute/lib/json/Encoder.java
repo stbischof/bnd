@@ -178,7 +178,7 @@ public class Encoder implements Appendable, Closeable, Flushable {
 		linebreak();
 	}
 
-	public void linebreak() throws IOException {
+	void linebreak() throws IOException {
 		if (linebreak != null) {
 			app.append(linebreak);
 			if (tabs != null) {
