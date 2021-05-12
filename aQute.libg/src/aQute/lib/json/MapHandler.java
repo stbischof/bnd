@@ -16,7 +16,7 @@ public class MapHandler extends Handler {
 	final Type		keyType;
 	final Type		valueType;
 
-	MapHandler(Class<?> rawClass, Type keyType, Type valueType) {
+	public MapHandler(Class<?> rawClass, Type keyType, Type valueType) {
 
 		if (rawClass != Map.class) {
 			ParameterizedType type = findAncestor(rawClass, Map.class);

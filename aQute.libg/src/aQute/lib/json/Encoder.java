@@ -171,7 +171,7 @@ public class Encoder implements Appendable, Closeable, Flushable {
 		return this;
 	}
 
-	public void undent() throws IOException {
+	void undent() throws IOException {
 		if (tabs != null) {
 			indent = indent.substring(tabs.length());
 		}
@@ -187,7 +187,7 @@ public class Encoder implements Appendable, Closeable, Flushable {
 		}
 	}
 
-	public void indent() throws IOException {
+	void indent() throws IOException {
 		if (tabs != null) {
 			indent += tabs;
 		}

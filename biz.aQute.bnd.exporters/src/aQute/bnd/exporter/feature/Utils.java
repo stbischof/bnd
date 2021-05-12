@@ -1,18 +1,18 @@
 package aQute.bnd.exporter.feature;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.osgi.util.feature.Feature;
 import org.osgi.util.feature.FeatureBundle;
 import org.osgi.util.feature.FeatureBundleBuilder;
-import org.osgi.util.feature.FeatureConfiguration;
 import org.osgi.util.feature.Features;
 import org.osgi.util.feature.ID;
 
 import aQute.bnd.build.Container;
-import aQute.bnd.exporter.feature.json.FeatureConfigurationJsonHandler;
-import aQute.bnd.exporter.feature.json.FeatureIDJsonHandler;
-import aQute.bnd.exporter.feature.json.FeatureJsonHandler;
+import aQute.bnd.exporter.feature.json.FeatureExporterConfig;
+import aQute.bnd.exporter.feature.json.JsonUtil;
 import aQute.bnd.osgi.Jar;
 import aQute.bnd.osgi.Processor;
 import aQute.lib.json.JSONCodec;
@@ -27,7 +27,7 @@ public class Utils {
 	public static String	FEATURE_BUNDLE			= FEATURE + "bundle";
 	public static String	FEATURE_BUNDLE_CHECKSUM	= FEATURE_BUNDLE + "checksum.";
 
-	public static FeatureBundle toFeatureBundle(Container container) {
+	public static FeatureBundle toFeatureBundle(Container container, FeatureExporterConfig exporterConfig) {
 
 		try (Jar jar = new Jar(container.getFile()); Processor p = new Processor()) {
 
@@ -36,7 +36,9 @@ public class Utils {
 			FeatureBundleBuilder featureBundleBuilder = Features.getBuilderFactory()
 				.newBundleBuilder(id);
 
-			addMetadataChecksum(jar, p, featureBundleBuilder);
+			if (exporterConfig.bundleHashes) {
+				addMetadataChecksum(jar, p, featureBundleBuilder);
+			}
 			// maybe license
 
 			return featureBundleBuilder.build();
@@ -62,29 +64,31 @@ public class Utils {
 		plugin.setReporter(p);
 
 		final ChecksumDTO checksumDTO = plugin.extract(jar, Locale.forLanguageTag("und"));
-		featureBundleBuilder.addMetadata(FEATURE_BUNDLE_CHECKSUM + "md5", checksumDTO.md5);
-		featureBundleBuilder.addMetadata(FEATURE_BUNDLE_CHECKSUM + "sha1", checksumDTO.sha1);
-		featureBundleBuilder.addMetadata(FEATURE_BUNDLE_CHECKSUM + "sha256", checksumDTO.sha256);
-		featureBundleBuilder.addMetadata(FEATURE_BUNDLE_CHECKSUM + "sha512", checksumDTO.sha512);
+		featureBundleBuilder.addMetadata(FEATURE_BUNDLE_CHECKSUM, checksumDTO);
+
 	}
 
 	// writeConfigurationsAsComment(writer);
 	// writeFeatureExtensionsFromFeatureBundlesAsComment(writer);
 	// writeGogoCommandsAuthAsComment(writer);
 
-	public static String toJson(Feature f) throws Exception {
+	public static String toJson(Feature feature, FeatureExporterConfig c) throws Exception {
 
 		JSONCodec jsonCodec = new JSONCodec();
 
-		jsonCodec.addHandler(Feature.class, new FeatureJsonHandler());
-
-		jsonCodec.addHandler(ID.class, new FeatureIDJsonHandler());
-		jsonCodec.addHandler(FeatureConfiguration.class, new FeatureConfigurationJsonHandler());
+		Map<String, Object> featureMap = JsonUtil.createJsonFreatureMap(feature);
 
 		String s = jsonCodec.enc()
 			.indent("  ")
-			.put(f)
+			.put(featureMap)
 			.toString();
+
+		s = s.lines()
+			.map(
+				line -> line.replaceAll("(.*)\\\"____COMMENT____.*\\\":\\\"(.*)\\\",", "$1$2"))
+			.collect(Collectors.joining(System.lineSeparator()));
+
+
 		return s;
 
 	}

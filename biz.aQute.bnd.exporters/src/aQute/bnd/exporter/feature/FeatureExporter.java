@@ -21,6 +21,7 @@ import org.osgi.util.feature.ID;
 
 import aQute.bnd.annotation.plugin.BndPlugin;
 import aQute.bnd.build.Project;
+import aQute.bnd.exporter.feature.json.FeatureExporterConfig;
 import aQute.bnd.header.Parameters;
 import aQute.bnd.osgi.FileResource;
 import aQute.bnd.osgi.Resource;
@@ -30,9 +31,10 @@ import aQute.bnd.service.export.Exporter;
 @BndPlugin(name = "Feature Exporter")
 public class FeatureExporter implements Exporter {
 
-	private Project	project;
+	private Project					project;
 
-	private String	type;
+	private String					type;
+	private FeatureExporterConfig	exporterConfig	= new FeatureExporterConfig();
 
 	@Override
 	public String[] getTypes() {
@@ -48,8 +50,16 @@ public class FeatureExporter implements Exporter {
 
 		this.project = project;
 		this.type = type;
+		exporterConfig.bundleHashes = parse(options, "bundleHashes");
+		exporterConfig.configurationTemplates = parse(options, "configurationTemplates");
+		exporterConfig.nullFields = parse(options, "nullFields");
+		exporterConfig.structureDocumentation = parse(options, "structureDocumentation");
 		doFeatureFile();
 		return null;
+	}
+
+	private boolean parse(Map<String, String> options, String key) {
+		return Boolean.parseBoolean(options.getOrDefault(key, "false"));
 	}
 
 	private void doFeatureFile() throws Exception {
@@ -98,8 +108,8 @@ public class FeatureExporter implements Exporter {
 		// .newConfigurationBuilder("factoryPid", "name")
 		// .build());
 
-		Feature f = featureBuilder.build();
-		String json = Utils.toJson(f);
+		Feature feature = featureBuilder.build();
+		String json = Utils.toJson(feature, exporterConfig);
 		Files.writeString(jsonPath.toPath(), json);
 		Resource jsonResource = new FileResource(jsonPath);
 	}
@@ -149,7 +159,7 @@ public class FeatureExporter implements Exporter {
 		try {
 			return Optional.ofNullable(project.getRunbundles()
 				.stream()
-				.map(Utils::toFeatureBundle)
+				.map(c -> Utils.toFeatureBundle(c, exporterConfig))
 				.collect(Collectors.toList()));
 		} catch (Exception e) {
 
