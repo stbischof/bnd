@@ -90,6 +90,14 @@ public class FeatureExporter implements Exporter {
 		}
 		jsonPath.createNewFile();
 
+		// featureBuilder.addConfigurations(Features.getBuilderFactory()
+		// .newConfigurationBuilder("pid")
+		// .build());
+		//
+		// featureBuilder.addConfigurations(Features.getBuilderFactory()
+		// .newConfigurationBuilder("factoryPid", "name")
+		// .build());
+
 		Feature f = featureBuilder.build();
 		String json = Utils.toJson(f);
 		Files.writeString(jsonPath.toPath(), json);

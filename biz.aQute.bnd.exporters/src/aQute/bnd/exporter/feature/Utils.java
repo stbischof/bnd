@@ -5,10 +5,12 @@ import java.util.Locale;
 import org.osgi.util.feature.Feature;
 import org.osgi.util.feature.FeatureBundle;
 import org.osgi.util.feature.FeatureBundleBuilder;
+import org.osgi.util.feature.FeatureConfiguration;
 import org.osgi.util.feature.Features;
 import org.osgi.util.feature.ID;
 
 import aQute.bnd.build.Container;
+import aQute.bnd.exporter.feature.json.FeatureConfigurationJsonHandler;
 import aQute.bnd.exporter.feature.json.FeatureIDJsonHandler;
 import aQute.bnd.exporter.feature.json.FeatureJsonHandler;
 import aQute.bnd.osgi.Jar;
@@ -77,6 +79,7 @@ public class Utils {
 		jsonCodec.addHandler(Feature.class, new FeatureJsonHandler());
 
 		jsonCodec.addHandler(ID.class, new FeatureIDJsonHandler());
+		jsonCodec.addHandler(FeatureConfiguration.class, new FeatureConfigurationJsonHandler());
 
 		String s = jsonCodec.enc()
 			.indent("  ")

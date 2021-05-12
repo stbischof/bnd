@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.osgi.util.feature.Feature;
+import org.osgi.util.feature.FeatureConfiguration;
 import org.osgi.util.feature.ID;
 
 import aQute.lib.json.Encoder;
@@ -91,7 +93,23 @@ public class FeatureJsonHandler extends Handler {
 			app.linebreak();
 			StringHandler.string(app, "configurations");
 			app.append(":");
-			app.encode(f.getConfigurations(), Map.class, visited);
+			app.append("{");
+			app.indent();
+
+			String delConf = "";
+			Map<String, FeatureConfiguration> fcMap = f.getConfigurations();
+			for (Entry<String, FeatureConfiguration> entry : fcMap.entrySet()) {
+				app.append(delConf);
+				if (!delConf.isEmpty()) {
+					app.linebreak();
+				}
+				delConf = DELIMITER;
+				StringHandler.string(app, entry.getKey());
+				app.encode(entry.getValue(), FeatureConfiguration.class, visited);
+			}
+			app.undent();
+			app.append("}");
+
 		}
 
 		if (f.getExtensions() != null && !f.getExtensions()
