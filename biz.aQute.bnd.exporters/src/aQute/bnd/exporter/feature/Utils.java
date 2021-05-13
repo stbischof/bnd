@@ -84,10 +84,8 @@ public class Utils {
 			.toString();
 
 		s = s.lines()
-			.map(
-				line -> line.replaceAll("(.*)\\\"____COMMENT____.*\\\":\\\"(.*)\\\",", "$1$2"))
+			.map(line -> line.replaceAll("(.*)\\\"____COMMENT____.*\\\":\\\"(.*)\\\",", "$1$2"))
 			.collect(Collectors.joining(System.lineSeparator()));
-
 
 		return s;
 
