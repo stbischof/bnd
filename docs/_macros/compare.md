@@ -1,20 +1,14 @@
 ---
 layout: default
 class: Macro
-title: compare NUMBER NUMBER
-summary: Compare two numbers. 0 is equal, 1 means a > b, -1 is a < b.
+title: compare STRING STRING
+summary: Compare two strings by using the String method compareTo. <astring>.compareTo(<bstring>)
 ---
 
-	static String	_ncompare	= "${ncompare;<anumber>;<bnumber>}";
+	static String	_compareHelp  = ${compare;<astring>;<bstring>}";
 
-	public int _ncompare(String args[]) throws Exception {
-		verifyCommand(args, _ncompare, null, 3, 3);
-		double a = Double.parseDouble(args[1]);
-		double b = Double.parseDouble(args[2]);
-		if (a > b)
-			return 1;
-		if (a < b)
-			return -1;
-		return 0;
+	public int _compare(String[] args) throws Exception {
+		verifyCommand(args, _compareHelp, null, 3, 3);
+		int n = args[1].compareTo(args[2]);
+		return Integer.signum(n);
 	}
-
