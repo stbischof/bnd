@@ -120,4 +120,6 @@ public @interface CustomA {
 			return value;
 		}
 	}
+	
+	String version() default "";
 }
