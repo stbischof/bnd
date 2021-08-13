@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 import org.osgi.annotation.bundle.Attribute;
 import org.osgi.annotation.bundle.Requirement;
+import org.osgi.annotation.versioning.Version;
 
 @Retention(CLASS)
 @Target({
@@ -120,4 +121,10 @@ public @interface CustomA {
 			return value;
 		}
 	}
+	
+	/**
+	 * Missleading Error
+	 */
+	@Attribute
+	Version version() default @Version("1.0.0");
 }
