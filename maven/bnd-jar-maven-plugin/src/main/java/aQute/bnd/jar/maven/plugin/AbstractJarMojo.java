@@ -1,0 +1,253 @@
+package aQute.bnd.jar.maven.plugin;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
+
+public abstract class AbstractJarMojo extends AbstractMojo {
+
+	private static final String[]	DEFAULT_EXCLUDES			= new String[] {
+		"**/package.html"
+	};
+
+	private static final String[]	DEFAULT_INCLUDES			= new String[] {
+		"**/**"
+	};
+
+	private static final String		MODULE_DESCRIPTOR_FILE_NAME	= "module-info.class";
+
+	/**
+	 * List of files to include. Specified as fileset patterns which are
+	 * relative to the input directory whose contents is being packaged into the
+	 * JAR.
+	 */
+	@Parameter
+	private String[]				includes;
+
+	/**
+	 * List of files to exclude. Specified as fileset patterns which are
+	 * relative to the input directory whose contents is being packaged into the
+	 * JAR.
+	 */
+	@Parameter
+	private String[]				excludes;
+
+	/**
+	 * Directory containing the generated JAR.
+	 */
+	@Parameter(defaultValue = "${project.build.directory}", required = true)
+	private File					outputDirectory;
+
+	/**
+	 * Name of the generated JAR.
+	 */
+	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
+	private String					finalName;
+
+	/**
+	 * The Jar archiver.
+	 */
+	// @Component
+	// private Map<String, Archiver> archivers;
+
+	/**
+	 * The {@link MavenProject}.
+	 */
+	@Parameter(defaultValue = "${project}", readonly = true, required = true)
+	private MavenProject			project;
+
+	/**
+	 * The {@link MavenSession}.
+	 */
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+	private MavenSession			session;
+
+	// /**
+	// * The archive configuration to use. See <a
+	// href="http://maven.apache.org/shared/maven-archiver/index.html">Maven
+	// * Archiver Reference</a>.
+	// */
+	// @Parameter
+	// private MavenArchiveConfiguration archive = new
+	// MavenArchiveConfiguration();
+
+	/**
+	 *
+	 */
+	@Component
+	private MavenProjectHelper		projectHelper;
+
+	/**
+	 * Require the jar plugin to build a new JAR even if none of the contents
+	 * appear to have changed. By default, this plugin looks to see if the
+	 * output jar exists and inputs have not changed. If these conditions are
+	 * true, the plugin skips creation of the jar. This does not work when other
+	 * plugins, like the maven-shade-plugin, are configured to post-process the
+	 * jar. This plugin can not detect the post-processing, and so leaves the
+	 * post-processed jar in place. This can lead to failures when those plugins
+	 * do not expect to find their own output as an input. Set this parameter to
+	 * <tt>true</tt> to avoid these problems by forcing this plugin to recreate
+	 * the jar every time.<br/>
+	 * Starting with <b>3.0.0</b> the property has been renamed from
+	 * <code>jar.forceCreation</code> to <code>maven.jar.forceCreation</code>.
+	 */
+	@Parameter(property = "maven.jar.forceCreation", defaultValue = "false")
+	private boolean					forceCreation;
+
+	/**
+	 * Skip creating empty archives.
+	 */
+	@Parameter(defaultValue = "false")
+	private boolean					skipIfEmpty;
+
+	/**
+	 * Timestamp for reproducible output archive entries, either formatted as
+	 * ISO 8601 <code>yyyy-MM-dd'T'HH:mm:ssXXX</code> or as an int representing
+	 * seconds since the epoch (like <a href=
+	 * "https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>).
+	 *
+	 * @since 3.2.0
+	 */
+	@Parameter(defaultValue = "${project.build.outputTimestamp}")
+	private String					outputTimestamp;
+
+	/**
+	 * Return the specific output directory to serve as the root for the
+	 * archive.
+	 *
+	 * @return get classes directory.
+	 */
+	protected abstract File getClassesDirectory();
+
+	/**
+	 * @return the {@link #project}
+	 */
+	protected final MavenProject getProject() {
+		return project;
+	}
+
+	/**
+	 * Overload this to produce a jar with another classifier, for example a
+	 * test-jar.
+	 *
+	 * @return get the classifier.
+	 */
+	protected abstract String getClassifier();
+
+	/**
+	 * Overload this to produce a test-jar, for example.
+	 *
+	 * @return return the type.
+	 */
+	protected abstract String getType();
+
+	/**
+	 * Returns the Jar file to generate, based on an optional classifier.
+	 *
+	 * @param basedir the output directory
+	 * @param resultFinalName the name of the ear file
+	 * @param classifier an optional classifier
+	 * @return the file to generate
+	 */
+	protected File getJarFile(File basedir, String resultFinalName, String classifier) {
+		if (basedir == null) {
+			throw new IllegalArgumentException("basedir is not allowed to be null");
+		}
+		if (resultFinalName == null) {
+			throw new IllegalArgumentException("finalName is not allowed to be null");
+		}
+
+		StringBuilder fileName = new StringBuilder(resultFinalName);
+
+		if (hasClassifier()) {
+			fileName.append("-")
+				.append(classifier);
+		}
+
+		fileName.append(".jar");
+
+		return new File(basedir, fileName.toString());
+	}
+
+	public File createArchive()
+	// throws MojoExecutionException
+	{
+		File jarFile = getJarFile(outputDirectory, finalName, getClassifier());
+		List<String> includes = Arrays.asList(getIncludes());
+		List<String> excludes = Arrays.asList(getExcludes());
+		return jarFile;
+	}
+
+	/**
+	 * Generates the JAR.
+	 *
+	 * @throws MojoExecutionException in case of an error.
+	 */
+	@Override
+	public void execute() throws MojoExecutionException {
+
+		if (skipIfEmpty && (!getClassesDirectory().exists() || getClassesDirectory().list().length < 1)) {
+			getLog().info("Skipping packaging of the " + getType());
+		} else {
+			File jarFile = createArchive();
+
+			if (hasClassifier()) {
+				projectHelper.attachArtifact(getProject(), getType(), getClassifier(), jarFile);
+			} else {
+				if (projectHasAlreadySetAnArtifact()) {
+					throw new MojoExecutionException("You have to use a classifier "
+						+ "to attach supplemental artifacts to the project instead of replacing them.");
+				}
+				getProject().getArtifact()
+					.setFile(jarFile);
+			}
+		}
+	}
+
+	private boolean projectHasAlreadySetAnArtifact() {
+		if (getProject().getArtifact()
+			.getFile() != null) {
+			return getProject().getArtifact()
+				.getFile()
+				.isFile();
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * @return true in case where the classifier is not {@code null} and
+	 *         contains something else than white spaces.
+	 */
+	protected boolean hasClassifier() {
+		boolean result = false;
+		if (getClassifier() != null && getClassifier().trim()
+			.length() > 0) {
+			result = true;
+		}
+
+		return result;
+	}
+
+	private String[] getIncludes() {
+		if (includes != null && includes.length > 0) {
+			return includes;
+		}
+		return DEFAULT_INCLUDES;
+	}
+
+	private String[] getExcludes() {
+		if (excludes != null && excludes.length > 0) {
+			return excludes;
+		}
+		return DEFAULT_EXCLUDES;
+	}
+}
