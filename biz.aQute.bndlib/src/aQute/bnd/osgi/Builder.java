@@ -1290,9 +1290,10 @@ public class Builder extends Analyzer {
 		// optionally appended with a modified regular expression
 		// like @zip.jar!/META-INF/MANIFEST.MF
 		int n = source.lastIndexOf("!/");
+		String cleanSource = source.substring(n + 2);
 		Instruction instr = null;
 		if (n > 0) {
-			instr = new Instruction(source.substring(n + 2));
+			instr = new Instruction(cleanSource);
 			source = source.substring(0, n);
 		}
 
@@ -1317,6 +1318,7 @@ public class Builder extends Analyzer {
 
 			for (Jar j : sub)
 				addAll(jar, j, instr, destination, nameMapper);
+
 		}
 	}
 
@@ -1342,6 +1344,7 @@ public class Builder extends Analyzer {
 	}
 
 	private boolean addAll(Jar to, Jar sub, Instruction filter, String destination, Function<String, String> modifier) {
+
 		boolean dupl = false;
 		for (String name : sub.getResources()
 			.keySet()) {
