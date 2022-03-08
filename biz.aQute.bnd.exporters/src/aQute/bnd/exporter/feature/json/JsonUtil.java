@@ -185,7 +185,7 @@ public class JsonUtil {
 					.collect(Collectors.toList()));
 				break;
 			case JSON :
-				Map jsonMap = new JSONCodec().dec()
+				Map<?, ?> jsonMap = new JSONCodec().dec()
 					.from(featureExtension.getJSON())
 					.get(Map.class);
 
@@ -260,8 +260,7 @@ public class JsonUtil {
 
 			String jsonKey = configurationValuesEntry.getKey();
 			Object jsonValue = configurationValuesEntry.getValue();
-			// TODO: Ask P.K how Converter could help to get the Name of The
-			// type as String
+
 			String type = TypeConverter.convertObjectToTyped(jsonValue);
 			if (type != null && !type.isEmpty()) {
 				jsonKey = jsonKey + ":" + type;

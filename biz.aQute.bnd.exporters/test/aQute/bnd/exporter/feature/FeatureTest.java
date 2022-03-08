@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.osgi.service.feature.Feature;
 import org.osgi.service.feature.FeatureArtifact;
@@ -29,8 +30,7 @@ public class FeatureTest {
 	private static final List<String>			CATEG	= Lists.of("tooling", "docker", "bundle");
 	private static final Map<String, Object> VARS = Maps.of("k1", "v1", "k2", "v2");
 
-	@Test
-	public void test1() throws Exception {
+	private static Feature mockFeature() {
 
 		Feature feature = mock(Feature.class);
 		ID id = mock(ID.class);
@@ -141,11 +141,19 @@ public class FeatureTest {
 		extensionMap.put("ext3", extension3);
 		when(feature.getExtensions()).thenReturn(extensionMap);
 
+		return feature;
+
+	}
+
+	@Test
+	public void testGenerateFeatureDefaultConfig() throws Exception {
+
 		FeatureExporterConfig c = new FeatureExporterConfig();
-		String s = Utils.toJson(feature, c);
+
+		String s = Utils.toJson(mockFeature(), c);
 		System.out.println(s);
 
-		Map resultMap = new JSONCodec().dec()
+		Map<?, ?> resultMap = new JSONCodec().dec()
 			.from(s)
 			.get(Map.class);
 
@@ -161,7 +169,20 @@ public class FeatureTest {
 		assertEquals(resultMap.get("complete"), true);
 		assertEquals(resultMap.get("variables"), VARS);
 
+		Assertions.assertThat((List<Object>) resultMap.get("bundles"))
+			.contains("bundle1g:bundle1a:bundle1c:bundle1t:bundle1v",
+				Maps.of("id", "bundle2g:bundle2a:bundle2c:bundle2t:bundle2v", "k1", "v1", "hashes",
+					Maps.of("md5", "###", "sha1", "###", "sha256", "###"), "osgi.content", "###sha256###"));
 
+
+		Assertions.assertThat((Map) resultMap.get("extensions"))
+			.containsEntry("ext1",
+				Maps.of("kind", "MANDATORY", "type", "ARTIFACTS", "artifacts",
+					Lists.of(Maps.of("id", "g1:a1:c1:t1:v1", "my.ext.art.meta.1", "v", "foooo", "bar"),
+						Maps.of("id", "g2:a2:v2"))))
+			.containsEntry("ext2",
+				Maps.of("kind", "OPTIONAL", "type", "TEXT", "text", Lists.of("line1", "line2", "line3")))
+			.containsEntry("ext3", Maps.of("kind", "TRANSIENT", "type", "JSON", "json", Maps.of("foo", "bar")));
 	}
 
 }

@@ -12,7 +12,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.osgi.framework.Constants;
-import org.osgi.resource.Capability;
 import org.osgi.service.feature.FeatureBundle;
 import org.osgi.service.feature.FeatureConfiguration;
 import org.osgi.service.feature.FeatureExtension;
@@ -22,10 +21,8 @@ import aQute.bnd.build.Project;
 import aQute.bnd.exporter.feature.internal.Feature_;
 import aQute.bnd.exporter.feature.internal.ID_;
 import aQute.bnd.exporter.feature.json.FeatureExporterConfig;
-import aQute.bnd.header.Parameters;
 import aQute.bnd.osgi.FileResource;
 import aQute.bnd.osgi.Resource;
-import aQute.bnd.osgi.resource.CapReqBuilder;
 import aQute.bnd.service.export.Exporter;
 import aQute.lib.io.IO;
 
@@ -52,8 +49,6 @@ public class FeatureExporter implements Exporter {
 		this.project = project;
 		this.type = type;
 		exporterConfig.bundleHashes = parse(options, "bundleHashes");
-		exporterConfig.configurationTemplates = parse(options, "configurationTemplates");
-		exporterConfig.nullFields = parse(options, "nullFields");
 		exporterConfig.structureDocumentation = parse(options, "structureDocumentation");
 		Entry<String, Resource> featureRes = doFeatureFile(exporterConfig);
 		return featureRes;
@@ -153,13 +148,16 @@ public class FeatureExporter implements Exporter {
 
 	}
 
-	Optional<List<Capability>> capabilities() {
+	// Discussion in OSGi-WG if capabilities or requirement shpild be a
+	// Attribute of Features.
 
-		Parameters parameters = project.getProvideCapability();
-		List<Capability> list = CapReqBuilder.getCapabilitiesFrom(parameters);
-		return Optional.ofNullable(list);
-
-	}
+	// Optional<List<Capability>> capabilities() {
+	//
+	// Parameters parameters = project.getProvideCapability();
+	// List<Capability> list = CapReqBuilder.getCapabilitiesFrom(parameters);
+	// return Optional.ofNullable(list);
+	//
+	// }
 
 	// Optional<List<MatchingRequirement>> requirement() {
 	//
