@@ -88,8 +88,10 @@ public class JsonUtil {
 			.ifPresent(v -> jsonMapFeature.put("vendor", v));
 		feature.getLicense()
 			.ifPresent(v -> jsonMapFeature.put("license", v));
-
-		jsonMapFeature.put("categories", feature.getCategories());
+		if (!feature.getCategories()
+			.isEmpty()) {
+			jsonMapFeature.put("categories", feature.getCategories());
+		}
 		feature.getDocURL()
 			.ifPresent(v -> jsonMapFeature.put("docurl", v));
 		feature.getSCM()
@@ -97,7 +99,9 @@ public class JsonUtil {
 		if (cfg.structureDocumentation) {
 			comment(jsonMapFeature, "A complete feature has no external dependencies");
 		}
-		jsonMapFeature.put("complete", feature.isComplete());
+		if (feature.isComplete()) {
+			jsonMapFeature.put("complete", feature.isComplete());
+		}
 
 		Map<String, Object> vars = feature.getVariables();
 

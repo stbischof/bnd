@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.osgi.framework.Constants;
+import org.osgi.service.feature.Feature;
 import org.osgi.service.feature.FeatureBundle;
 import org.osgi.service.feature.FeatureConfiguration;
 import org.osgi.service.feature.FeatureExtension;
@@ -24,6 +25,7 @@ import aQute.bnd.exporter.feature.json.FeatureExporterConfig;
 import aQute.bnd.osgi.FileResource;
 import aQute.bnd.osgi.Resource;
 import aQute.bnd.service.export.Exporter;
+import aQute.bnd.unmodifiable.Lists;
 import aQute.lib.io.IO;
 
 @BndPlugin(name = "Feature Exporter")
@@ -32,13 +34,14 @@ public class FeatureExporter implements Exporter {
 	private Project					project;
 
 	private String					type;
+
+	public static String			TYPE_OSGI_FEATURE			= "osgi.feature";
 	private FeatureExporterConfig	exporterConfig	= new FeatureExporterConfig();
 
 	@Override
 	public String[] getTypes() {
-
 		return new String[] {
-			"feature.json"
+			TYPE_OSGI_FEATURE
 		};
 	}
 
@@ -60,22 +63,7 @@ public class FeatureExporter implements Exporter {
 
 	private Map.Entry<String, Resource> doFeatureFile(FeatureExporterConfig cfg) throws Exception {
 
-		Feature_ feature = new Feature_();
-		ID_ fId = new ID_();
-		fId.groupId = "groupId";
-		fId.artifactId = "artefactId";
-		fId.version = version().orElse("0.0.0-INITIAL");
-		feature.id = fId;
-
-		feature.name = name();
-		feature.description = decription();
-		feature.license = license();
-		feature.vendor = vendor();
-
-		feature.configurations = featureConfigurations();
-		feature.bundles = featureBundles();
-		feature.variables = variables();
-		feature.extensions = extensions();
+		Feature feature = feature();
 
 		// FileWriter
 		String fileName = featureName(project);
@@ -90,6 +78,55 @@ public class FeatureExporter implements Exporter {
 		IO.write(json.getBytes(), jsonPath);
 		Resource jsonResource = new FileResource(jsonPath);
 		return new AbstractMap.SimpleEntry<String, Resource>(jsonPath.toString(), jsonResource);
+	}
+
+	private Feature feature() {
+		Feature_ feature = new Feature_();
+		ID_ fId = new ID_();
+		fId.groupId = groupId();
+		fId.artifactId = artifactId();
+		fId.version = version().orElse("0.0.0-INITIAL");
+		feature.id = fId;
+
+		feature.name = name();
+		feature.description = decription();
+		feature.license = license();
+		feature.vendor = vendor();
+		feature.categories = categories();
+		feature.docURL = docURL();
+
+		feature.configurations = featureConfigurations();
+		feature.bundles = featureBundles();
+		feature.variables = variables();
+		feature.extensions = extensions();
+		return feature;
+	}
+
+	private String groupId() {
+		String groupId = project.getProperty("-groupid", "undefinedGroupId");
+
+		return groupId;
+	}
+
+	private String artifactId() {
+		String bsn = project.getBundleSymbolicName()
+			.getKey();
+		if (bsn == null || bsn.isEmpty()) {
+			bsn = "undefinedArtifactId";
+		}
+		return bsn;
+	}
+
+	private Optional<String> docURL() {
+		return Optional.ofNullable(project.getBundleDocURL());
+	}
+
+	private List<String> categories() {
+		String cat = project.getBundleCategory();
+		if (cat == null || cat.isEmpty()) {
+			return Lists.of();
+		}
+		return Lists.of(project.getBundleCategory());
 	}
 
 	private Optional<String> version() {

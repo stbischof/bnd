@@ -26,7 +26,7 @@ import aQute.bnd.unmodifiable.Lists;
 import aQute.bnd.unmodifiable.Maps;
 import aQute.lib.json.JSONCodec;
 
-public class FeatureTest {
+public class FeatureJsonTest {
 	private static final List<String>			CATEG	= Lists.of("tooling", "docker", "bundle");
 	private static final Map<String, Object> VARS = Maps.of("k1", "v1", "k2", "v2");
 

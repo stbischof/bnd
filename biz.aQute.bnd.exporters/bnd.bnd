@@ -24,6 +24,7 @@
 	${junit},\
 	slf4j.simple;version=latest,\
 	${mockito},\
+	biz.aQute.bnd.reporter;version=latest,\
 	biz.aQute.bnd.util
 
 -baseline: *
